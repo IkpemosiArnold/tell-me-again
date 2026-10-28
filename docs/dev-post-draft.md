@@ -17,7 +17,9 @@ you and she are happy to share.
 
 [ARNOLD: two or three sentences about your grandmother's stories. For example, the story you have heard the most times, or the one you only heard once and can't get back. Only what you're happy to share.]
 
-Every family I know has a person like that, and a phone full of voice notes nobody will ever listen to again. So for this week's theme, "honour the past", I built the thing I wish we had: a way to sit with an elder for an evening, record the stories properly, and come away with something the cousins will actually read.
+[ARNOLD: optional self-own, keep only if true: "I'm not the grandchild who remembers every story. I'm the one who keeps saying 'tell me again'."]
+
+Most families have a person like that. Many also have a phone full of their voice notes that nobody will ever play again. So for this week's theme, "honour the past", I built the thing I wish we had: a way to sit with an elder for an evening, record the stories properly, and come away with something the cousins will actually read.
 
 ## What I Built
 
@@ -30,14 +32,15 @@ A session goes like this:
 1. **Ask first.** Before the first story, you record them saying yes, in their own words and any language. That clip is saved with the stories. For recordings of someone who has already passed on, the family writes down who agreed to keep them instead.
 2. **Record.** A kerosene hurricane lamp glows with the speaker's voice. If you grew up with NEPA, you know the lamp. "Next story" starts a new chapter without stopping, and there's a "Need a question?" card for when the conversation stalls.
 3. **Write it down.** Whisper runs on the device. Tap any line to fix it, tap its time to hear that part again.
-4. **Make the book.** Gemma reads the transcript and writes the book on the device, or, if you say so for this session only, with Google's free Gemma API.
-5. **Keep it.** One .zip: the consent clip, every recording, the transcript, the story book as a plain HTML file that any browser can open in twenty years, and a data file the app can open again on another phone.
+4. **Check the names.** Before the book, the app asks "Did they say these names?" and shows each one with the sentence it was heard in.
+5. **Make the book.** Gemma reads the transcript and writes the book on the device, or, if you say so for this session only, with Google's free Gemma API.
+6. **Keep it.** One .zip: the consent clip, every recording, the transcript, the story book as a plain HTML file that doesn't need this app to open, and a data file the app can open again on another phone.
 
 [SCREENSHOT: docs/screens/01-home.png and docs/screens/05-recording.png side by side. Caption: "The lamp follows the voice. That is the whole recording screen."]
 
 ### The honest part: languages
 
-My grandmother doesn't tell stories in English. [ARNOLD: which language(s) she tells them in, only if you're happy to say.] So the first thing I checked was which Nigerian languages a phone can write down today, using open models that run in a browser tab. The answer surprised me, and not in a good way.
+A lot of Nigerian grandparents tell their best stories in Yorùbá, Igbo, Hausa or Pidgin, or all of them in one sentence. [ARNOLD: optional, which language yours uses, only if you're happy to say.] So the first thing I checked was which Nigerian languages a phone can write down today, using open models that run in a browser tab. The answer surprised me, and not in a good way.
 
 | Language | What the app does | Why |
 |---|---|---|
@@ -51,7 +54,7 @@ Good Yorùbá, Igbo and Hausa models do exist on Hugging Face, fine-tuned by Nig
 
 I would rather ship a label that says "You type it" than a transcript that is confidently wrong about Grandma.
 
-Even in English the names suffer. In my test recording (a synthetic voice reading a made-up story, more on that below), Whisper wrote "I was born in Warri" as "I was born in worry". Mama Efe became "Marmouve". That is why every transcript line is editable and why the app calls English a "useful draft", not a transcript.
+Even in English the names suffer. In my test recording (a synthetic voice reading a made-up story, more on that below), Whisper wrote "I was born in Warri" as "I was born in Worry". Mama Efe became "Marmauve". That is why every transcript line is editable and why the app calls English a "useful draft", not a transcript.
 
 ## Demo
 
@@ -75,7 +78,7 @@ It's a static site: Preact and Vite, no backend. Everything heavy happens in the
 
 **The story book.** Gemma 3 runs through llama.cpp compiled to WebAssembly (wllama): the 1B model (722 MB) on a computer, the 270M model (242 MB) on a phone. The answer is forced into a JSON shape by a grammar, so a small model can't wander off into prose. Small models can't read a long transcript at once, so the work is split: one call per passage of about 450 words (a chapter title, a short retelling, one quote, the people, places and moments in that passage), then one call for the book's title and the questions for next time.
 
-[PENDING: measured on my 2017 MacBook Pro: N-minute recording, Whisper base X min, Gemma 3 1B Y min for Z passages, at load average W.]
+On my 2017 MacBook Pro (2 cores, and busy with other work at the time), Whisper base wrote down the 98-second test story in 63 seconds. Gemma 3 1B took 17 minutes for the whole book, partly because llama.cpp was running on one thread: wllama uses half of the cores the browser reports, and this laptop reports 2. It now asks for two. [PENDING: the time with two threads.] Gemma 4 on Google's API took 18 to 54 seconds. A slow computer can also pick the 242 MB Gemma, which is rougher and quicker.
 
 **The ghost in the machine.** Small models make things up, and in a family archive that is not a quirk. It's a lie about your grandmother that will outlive her. So my first version kept nothing Gemma wrote about a person, place, year or quote unless it appeared in the transcript. A quote had to be word for word, a year had to have been said, and a question for next time couldn't ask about someone the recording never mentions.
 
@@ -104,7 +107,7 @@ Whisper has its own ghosts. It heard Warri as "worry", Surulere as "Sierra Leer"
 
 **Render.** The site is a free Render static site. I chose static on purpose: my Render workspace shares its free instance hours with other services, including a client's, and a static site uses none and never sleeps. The workspace also shares 5 GB of bandwidth a month across every service, so the site serves only the app itself, about 250 KB on a first visit. The models come from Hugging Face and the WebAssembly runtimes from jsDelivr. The site sends cross-origin isolation headers so those runtimes can use more than one thread.
 
-**Tests.** 58 unit tests (the grounding checks, the zip writer, the resumable downloader, the name stand-ins) and an end-to-end test that runs the whole flow in Chromium with a fake microphone: consent, a 34-second recording, Whisper writing it down, the book, the archive, and opening the archive again. The test's stand-in for Gemma invents an uncle and a year on purpose, and the test fails if either reaches the book.
+**Tests.** 67 unit tests (the grounding checks, the zip writer, the resumable downloader, the name stand-ins) and an end-to-end test that runs the whole flow in Chromium with a fake microphone: consent, a 34-second recording, Whisper writing it down, the book, the archive, and opening the archive again. The test's stand-in for Gemma invents an uncle and a year on purpose, and the test fails if either reaches the book.
 
 The test voice is macOS's synthetic "Daniel" reading a made-up story about a made-up Mama Efe from Warri. Nothing in the repo, the demo or this post is a real person's voice or story.
 
