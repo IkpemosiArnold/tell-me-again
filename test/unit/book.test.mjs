@@ -214,3 +214,15 @@ test("years and the no-AI outline", () => {
   assert.equal(o.chapters.length, 1);
   assert.equal(o.timeline[0].when, "1948");
 });
+
+test("support() scores a claim by its best supporting sentence", async () => {
+  const { support, firstMention } = await import("../../src/lib/book.js");
+  const text = "My father fished on the river. We moved to Lagos in 1978 because Daniel got work at the port in Apapa.";
+  assert.equal(support("Where Daniel got work at the port", text, ["Apapa"]), 1);
+  assert.equal(support("A port area in Lagos", text, ["Apapa"]) < 0.75, true);
+  assert.equal(support("anything", text, ["Kano"]), 0, "no sentence holds the anchor");
+  assert.equal(support("", text, ["Lagos"]), 1, "an empty claim claims nothing");
+  assert.equal(support("Fishing on the river", text, ["river"]) === 1, true, "fished ~ fishing");
+  assert.equal(firstMention("Apapa", text), "We moved to Lagos in 1978 because Daniel got work at the port in Apapa.");
+  assert.equal(firstMention("Kano", text), "");
+});

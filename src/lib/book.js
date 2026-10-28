@@ -290,14 +290,14 @@ export function capNames(text, passage = "") {
 
 const STOP = new Set("the and but then from with for was are were been being not yes you your our their her his she they them its this that who how why what when where which did does about after again also very much many some more most other into onto over under then than there their them they this that these those with without were was have has had would could should will just like only even ever never always every where when what which while who whom whose".split(" "));
 
-/** Words of model-written text that carry meaning, cut to a 5-letter stem ("fished" ~ "fishing"). */
+/** Words of model-written text that carry meaning, cut to a 4-letter stem ("fished" ~ "fishing"). */
 function contentStems(text) {
   return [
     ...new Set(
       fold(text)
         .split(" ")
         .filter((w) => w.length > 2 && !STOP.has(w))
-        .map((w) => w.slice(0, 5)),
+        .map((w) => w.slice(0, 4)),
     ),
   ];
 }
@@ -316,7 +316,7 @@ export function support(claim, text, anchors = [], elder = null) {
   for (const sent of sentences(text)) {
     if (!anchors.every((a) => appearsIn(a, sent))) continue;
     if (!need.length) return 1;
-    const have = new Set(fold(sent).split(" ").map((w) => w.slice(0, 5)));
+    const have = new Set(fold(sent).split(" ").map((w) => w.slice(0, 4)));
     best = Math.max(best, need.filter((x) => have.has(x)).length / need.length);
   }
   return best;
