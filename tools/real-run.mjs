@@ -81,6 +81,8 @@ try {
     log("book skipped");
   } else {
     await page.getByRole("radio", { name: /On this device/ }).click();
+    // SMALL_GEMMA=1: the 242 MB Gemma 3 270M (the phone model) instead of the 1B
+    if (process.env.SMALL_GEMMA) await page.getByRole("button", { name: /Slow computer\?/ }).click();
     tw = Date.now();
     await page.getByRole("button", { name: /make the book/i }).click();
     let last = "";
