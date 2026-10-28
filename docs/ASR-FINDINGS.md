@@ -47,3 +47,20 @@ Export `LyngualLabs/whisper-small-yoruba` and `EYEDOL/whisper-base-hausa` (both 
 
 - Safari 26 shipped WebGPU on iOS 26 (WebKit blog, 2025-09-15). This app runs Whisper on the CPU (WebAssembly) everywhere, which is the path Selects tested on iPhones.
 - In Nigeria, Android was 84.2% of mobile web traffic in September 2026 (StatCounter), so most of the families this is for are on Android phones.
+
+## What we saw ourselves (28 Oct 2026)
+
+On a synthetic voice (macOS "Daniel", a British English voice) reading a made-up 98-second story full of Nigerian names (`docs/demo/demo-story.txt`), Whisper base got the ordinary English almost word for word and most of the names wrong:
+
+| Said | Whisper base wrote |
+|---|---|
+| Mama Efe | Marmauve |
+| Warri | Worry |
+| Papa Okoro | Paparacoro |
+| Ogbe market | Ogg market |
+| Tari | Terry |
+| Benin City | Ben and City |
+| Surulere | Sierra Leer |
+| money no dey (Pidgin) | money no day |
+
+A synthetic British voice is not a Nigerian speaker, so this says nothing about accent. It does show the pattern the app is built around: names Whisper has never heard come out as English words it has. That is why the app asks "Did they say these names?" before the story book, and why a fix applies to every story at once. The full transcript is in `docs/screens/demo-transcript-whisper-base.txt`.
