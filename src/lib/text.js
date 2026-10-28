@@ -92,7 +92,7 @@ export function escapeHtml(s) {
 
 // capitalised words that are not names (sentence starters are skipped anyway)
 export const COMMON = new Set(
-  "i i'm i'll i've i'd god oh ok okay mr mrs miss dr sir ma madam chief alhaji alhaja mama papa baba iya oga grandma grandpa grandmother grandfather granny aunty auntie aunt uncle monday tuesday wednesday thursday friday saturday sunday january february march april may june july august september october november december christmas easter english pidgin yoruba igbo hausa the a an and but so then".split(" "),
+  "i i'm i'll i've i'd god oh ok okay mr mrs miss dr sir ma madam chief alhaji alhaja mama papa baba iya oga grandma grandpa grandmother grandfather granny aunty auntie aunt uncle father mother brother sister husband wife son daughter friend best day her his she he they we my our their in at on of to from with for by as when where what who how why which was is it this that monday tuesday wednesday thursday friday saturday sunday january february march april may june july august september october november december christmas easter english pidgin yoruba igbo hausa the a an and but so then".split(" "),
 );
 
 /** Replace a whole word or phrase everywhere, ignoring case: fixName("born in Worry", "worry", "Warri"). */

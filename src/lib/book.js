@@ -175,7 +175,14 @@ export function groundPassage(raw, passage, { elder } = {}) {
         continue;
       }
       seen.add(key);
-      out.push({ name, note: str(item?.who ?? item?.note, 160) });
+      let note = str(item?.who ?? item?.note, 160);
+      // "Ogg market, a bustling market in Lagos": the note's names must be said with this one
+      const noteNames = capNames(note, passage).filter((n) => !appearsIn(n, name));
+      if (noteNames.length && !saidTogether([name, ...noteNames], passage)) {
+        dropped.push({ kind: "note", value: `${name}: ${note}`, why: `${noteNames.join(", ")} is not said with ${name} in the recording` });
+        note = "";
+      }
+      out.push({ name, note });
       if (out.length >= max) break;
     }
     return out;
@@ -214,6 +221,12 @@ export function groundPassage(raw, passage, { elder } = {}) {
       dropped.push({ kind: "moment", value: `${when}: ${what}`, why: `${badYear} is not said in the recording` });
       continue;
     }
+    // "1969: went to St. Mary's school": a year and a name must be said in the same sentence
+    const terms = [...new Set([...ys, ...capNames(when, passage), ...capNames(what, passage)])];
+    if (terms.length >= 2 && !saidTogether(terms, passage)) {
+      dropped.push({ kind: "moment", value: `${when}: ${what}`, why: `${terms.join(" and ")} are not said together in the recording` });
+      continue;
+    }
     moments.push({ when, what });
     if (moments.length >= 5) break;
   }
@@ -242,6 +255,33 @@ function namesInQuestion(q) {
  * Clean the title and questions. With the transcript text, a question that names someone or
  * somewhere the recording never mentions is left out, like everything else Gemma invents.
  */
+/**
+ * Capitalised words in model-written text that could be names or places ("Lagos", "Mary's").
+ * The first word only counts when the transcript itself writes it with a capital in the
+ * middle of a sentence ("Daniel got work" yes, "Moved to Lagos" no).
+ */
+export function capNames(text, passage = "") {
+  const words = String(text || "")
+    .split(/\s+/)
+    .map((w) => w.replace(/^[^\p{L}]+|[^\p{L}'’-]+$/gu, "").replace(/['’]s$/, ""));
+  const midCaps = new Set(
+    sentences(passage).flatMap((s) =>
+      s
+        .split(/\s+/)
+        .slice(1)
+        .map((w) => w.replace(/^[^\p{L}]+|[^\p{L}'’-]+$/gu, "").replace(/['’]s$/, ""))
+        .filter((w) => /^\p{Lu}/u.test(w))
+        .map(fold),
+    ),
+  );
+  return [...new Set(words.filter((w, i) => /^\p{Lu}/u.test(w) && w.length > 2 && !COMMON.has(fold(w)) && (i > 0 || midCaps.has(fold(w)))))];
+}
+
+/** True when one sentence of the text contains every term. */
+export function saidTogether(terms, text) {
+  return sentences(text).some((sent) => terms.every((t) => appearsIn(t, sent)));
+}
+
 /** True when every mention of `name` in the text comes right after in, at, to, from or near. */
 export function looksLikePlace(name, text) {
   const n = fold(name);

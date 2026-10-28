@@ -55,6 +55,39 @@ test("a 'person' only ever named after in/at/to/from is moved to places", () => 
   assert.deepEqual(g.places.map((p) => p.name).sort(), ["Apapa", "Surulere"]);
 });
 
+test("notes and moments must be said together, not just somewhere (real Gemma 3 1B mistakes)", () => {
+  const text =
+    "My mother sold pepper soup at Ogg market. In 1960, on Independence Day, we walked to the town square. The next year I started at St. Mary's school. " +
+    "When I finished school in 1969, I went to Ben and City to train as a nurse. We moved to Lagos in 1978 because Daniel got work at the port in Apapa. Lagos was loud. Your father was born in Sierra Leer in 1980.";
+  const g = groundPassage(
+    {
+      title: "t",
+      retelling: "r",
+      quote: "",
+      people: [{ name: "Daniel", who: "Grandfather" }],
+      places: [
+        { name: "Ogg market", note: "A bustling market in Lagos" },
+        { name: "Apapa", note: "A port area in Lagos" },
+        { name: "Lagos", note: "A major city in Nigeria" },
+      ],
+      moments: [
+        { when: "1960", what: "Independence Day" },
+        { when: "1969", what: "Went to St. Mary's school" },
+        { when: "1978", what: "Moved to Lagos" },
+        { when: "1980", what: "Moved to Lagos" },
+      ],
+    },
+    text,
+  );
+  assert.deepEqual(g.people, [{ name: "Daniel", note: "Grandfather" }]);
+  assert.deepEqual(g.places.map((p) => p.note), ["", "A port area in Lagos", ""]);
+  assert.deepEqual(g.moments.map((m) => m.when), ["1960", "1978"]);
+  const why = g.dropped.map((d) => d.why).join(" | ");
+  assert.match(why, /Lagos is not said with Ogg market/);
+  assert.match(why, /1969 and Mary are not said together/);
+  assert.match(why, /1980 and Lagos are not said together/);
+});
+
 test("an invented quote is dropped, a missing title falls back to the first words", () => {
   const g = groundPassage({ quote: "We were very rich.", people: "nonsense" }, PASSAGE);
   assert.equal(g.chapter.quote, "");
