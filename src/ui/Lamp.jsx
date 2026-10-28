@@ -3,8 +3,16 @@
 // 0 to 1, set straight on the element so Preact does not re-render 30 times a second).
 import { useEffect, useRef } from "preact/hooks";
 
-export function Lamp({ state = "idle", level = null, big = false, label = "" }) {
+export function Lamp({ state = "idle", level = null, big = false, label = "", playful = false }) {
   const ref = useRef(null);
+  // on the home screen, a tap blows on the flame; it dips and comes back
+  const puff = () => {
+    const el = ref.current;
+    if (!playful || !el) return;
+    el.classList.remove("puff");
+    void el.offsetWidth;
+    el.classList.add("puff");
+  };
   useEffect(() => {
     if (!level) return;
     // level is a function the recorder calls; it writes the CSS variable directly
@@ -12,7 +20,7 @@ export function Lamp({ state = "idle", level = null, big = false, label = "" }) 
     return () => (level.current = null);
   }, [level]);
   return (
-    <div ref={ref} class={`lamp ${state} ${big ? "big" : ""}`} role={label ? "img" : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : "true"}>
+    <div ref={ref} onClick={puff} onAnimationEnd={(e) => e.animationName === "puff" && ref.current?.classList.remove("puff")} class={`lamp ${state} ${big ? "big" : ""} ${playful ? "playful" : ""}`} role={label ? "img" : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : "true"}>
       <div class="glow" />
       <svg viewBox="0 0 120 160" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         {/* handle */}

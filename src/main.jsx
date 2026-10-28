@@ -44,3 +44,8 @@ function App() {
 }
 
 render(<App />, document.getElementById("app"));
+
+// the app shell offline after one visit (public/sw.js); not in development
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}

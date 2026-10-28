@@ -347,6 +347,41 @@ button,
     animation: breathe 5s ease-in-out infinite;
   }
 }
+.lamp.playful {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lamp.puff .flame {
+    animation: puff 900ms var(--ease-out);
+  }
+  .lamp.puff .glow {
+    animation: puff-glow 900ms var(--ease-out);
+  }
+}
+@keyframes puff {
+  0% {
+    scale: 1 1;
+    rotate: 0deg;
+  }
+  18% {
+    scale: 0.7 0.35;
+    rotate: 14deg;
+  }
+  45% {
+    scale: 1.05 1.12;
+    rotate: -4deg;
+  }
+  100% {
+    scale: 1 0.95;
+    rotate: 0deg;
+  }
+}
+@keyframes puff-glow {
+  18% {
+    opacity: 0.15;
+  }
+}
 @keyframes flicker {
   0%,
   100% {

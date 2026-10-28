@@ -34,7 +34,7 @@ export function Home() {
   };
   return (
     <main class="screen home">
-      <Lamp state="idle" />
+      <Lamp state="idle" playful />
       <h1>Tell me again.</h1>
       <p class="lead">Record an elder's stories. This phone writes them down and helps you make a small family book. Nothing leaves the phone.</p>
       <div class="actions">
