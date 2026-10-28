@@ -60,7 +60,12 @@ export function wllamaBackend(key = "gemma3-1b") {
       const { Wllama } = await import("@wllama/wllama");
       w = new Wllama({ default: WLLAMA_WASM }, { allowOffline: true, suppressNativeLog: true });
       w.setCompat?.("default");
-      await w.loadModel([blob], { n_ctx: m.ctx, n_batch: 512, n_gpu_layers: 0 });
+      // wllama uses half the logical cores by default, which is ONE thread on a 2-core laptop
+      // (navigator.hardwareConcurrency is 2 on the 2017 MacBook Pro this was built on). Use
+      // at least 2 where there are 2, and at most 4.
+      const hc = globalThis.navigator?.hardwareConcurrency || 1;
+      const n_threads = Math.max(1, Math.min(4, hc, Math.max(2, Math.floor(hc / 2))));
+      await w.loadModel([blob], { n_ctx: m.ctx, n_batch: 512, n_gpu_layers: 0, n_threads });
       // how many threads llama.cpp got (1 without cross-origin isolation), shown with the book
       this.threads = w.isMultithread?.() ? w.getNumThreads?.() : 1;
     },
