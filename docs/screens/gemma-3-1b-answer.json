@@ -1,0 +1,35 @@
+{
+  "note": "What Gemma 3 1B (Q4_0, on the device, 28 Oct 2026) answered for the synthetic Mama Efe story, reconstructed field by field from the book it produced before the stricter checks (docs/screens/before-gemma-1b-book.png). The demo video replays this answer instead of waiting 17 minutes.",
+  "passage": {
+    "title": "A Busy Life",
+    "retelling": "Mama Efe shared stories of her childhood, vividly describing her life in Worry and the surrounding areas.",
+    "quote": "I never let anybody leave my house hungry.",
+    "people": [
+      { "name": "Paparacoro", "who": "Father" },
+      { "name": "Terry", "who": "Best friend" },
+      { "name": "Daniel", "who": "Grandfather" }
+    ],
+    "places": [
+      { "name": "Worry", "note": "A small village in Nigeria" },
+      { "name": "Ogg Market", "note": "A bustling market in Lagos" },
+      { "name": "Lagos", "note": "A major port city" },
+      { "name": "Apapa", "note": "A port area in Lagos" }
+    ],
+    "moments": [
+      { "when": "1960", "what": "Independence Day" },
+      { "when": "1969", "what": "Went to St. Mary's school" },
+      { "when": "1974", "what": "Married in church on Airport Road" },
+      { "when": "1978", "what": "Moved to Lagos" },
+      { "when": "1980", "what": "Moved to Lagos" }
+    ]
+  },
+  "book": {
+    "title": "Echoes of Mama Efe's World",
+    "questions": [
+      "What was Mama Efe’s favorite thing to do as a child?",
+      "Where did Mama Efe grow up?",
+      "What kind of clothes did she usually wear?",
+      "What was the biggest challenge she faced growing up?"
+    ]
+  }
+}

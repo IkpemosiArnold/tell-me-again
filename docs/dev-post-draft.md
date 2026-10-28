@@ -60,7 +60,7 @@ Even in English the names suffer. In my test recording (a synthetic voice readin
 
 **Live:** https://tellmeagain.onrender.com (it works best on Chrome or Safari; the first "write it down" downloads a 41 MB speech model on phones, 136 MB on a computer)
 
-[PENDING: 60 to 90 second demo video, synthetic voice and a made-up family, no real person]
+[VIDEO: docs/demo/tell-me-again-demo.mp4, about a minute. A synthetic voice reads a made-up story about a made-up Mama Efe; no real person is in it. Whisper runs live. The story book step replays the answer Gemma 3 1B gave for this story on my laptop (it took 17 minutes, so the video skips the wait, and says so), and the new checks run on it live.]
 
 [SCREENSHOT: docs/screens/11-book.png. Caption: "The story book, and what Gemma said that the recording doesn't."]
 
