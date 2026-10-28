@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+# private family recordings never belong in the repo
+private/
+*.MOV
+*.mov
+test-results/
