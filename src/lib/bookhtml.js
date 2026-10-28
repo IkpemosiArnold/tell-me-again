@@ -1,7 +1,7 @@
 // The story book as one self-contained HTML file: no scripts, no fonts or images to fetch,
 // readable offline in any browser for as long as browsers open HTML, and printable.
 
-import { clock, escapeHtml as e } from "./text.js";
+import { clock, escapeHtml as e, noteCase } from "./text.js";
 import { language } from "./languages.js";
 
 const fmtDate = (iso) => {
@@ -73,9 +73,9 @@ ${c.quote ? `<blockquote>${e(c.quote)}</blockquote>` : ""}`,
   )
   .join("\n")}
 <h2>People</h2>
-${list(book.people, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(p.note)}` : ""}</li>`)}
+${list(book.people, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(noteCase(p.note))}` : ""}</li>`)}
 <h2>Places</h2>
-${list(book.places, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(p.note)}` : ""}</li>`)}
+${list(book.places, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(noteCase(p.note))}` : ""}</li>`)}
 <h2>Timeline</h2>
 ${list(book.timeline, (m) => `<li><strong>${e(m.when || "Undated")}</strong>: ${e(m.what)}</li>`)}
 ${book.questions?.length ? `<h2>Questions to ask next time</h2>\n${list(book.questions, (q) => `<li>${e(q)}</li>`)}` : ""}

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { appearsIn, clock, fileSafe, fold, passages, replaceWord, sentences, wordCount } from "../../src/lib/text.js";
+import { appearsIn, clock, fileSafe, fold, noteCase, passages, replaceWord, sentences, wordCount } from "../../src/lib/text.js";
 
 test("fold removes tone marks and Hausa hooked letters", () => {
   assert.equal(fold("Ọ̀ṣun!"), "osun");
@@ -46,4 +46,11 @@ test("replaceWord fixes a misheard name everywhere, whole words only", () => {
   assert.equal(replaceWord("Ben and City", "Ben and City", "Benin City").text, "Benin City");
   assert.equal(replaceWord("a (b) c", "(b)", "x").text, "a (b) c".replace("(b)", "x"));
   assert.equal(replaceWord("x", "", "y").n, 0);
+});
+
+test("noteCase lower-cases a leading common word only", () => {
+  assert.equal(noteCase("Father"), "father");
+  assert.equal(noteCase("A port area in Lagos"), "a port area in Lagos");
+  assert.equal(noteCase("Daniel's brother"), "Daniel's brother");
+  assert.equal(noteCase(""), "");
 });

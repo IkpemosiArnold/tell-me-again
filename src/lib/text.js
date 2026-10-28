@@ -104,3 +104,11 @@ export function replaceWord(text, from, to) {
   const out = String(text || "").replace(re, () => (n++, to));
   return { text: out, n };
 }
+
+/** "Paparacoro, Father" reads better as "Paparacoro, father": lower-case a note's first word when it is not a name. */
+export function noteCase(note) {
+  const s = String(note || "").trim();
+  const first = s.split(/\s+/)[0] || "";
+  if (!first || !COMMON.has(fold(first)) || /^I\b/.test(s)) return s;
+  return s[0].toLowerCase() + s.slice(1);
+}

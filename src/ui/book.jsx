@@ -4,6 +4,7 @@ import { Bar, ErrorNote, Progress, Why, bytesDetail, go, saveFile, toast, useWak
 import { useSession } from "./session.jsx";
 import { saveSession, getBlob } from "../store/db.js";
 import { storyText } from "../lib/bookhtml.js";
+import { noteCase } from "../lib/text.js";
 import { makeBook } from "../lib/book.js";
 import { makeOutline } from "../lib/outline.js";
 import { buildArchive, archiveName } from "../lib/archive.js";
@@ -34,7 +35,7 @@ export function Book({ id }) {
 }
 
 function Maker({ s, onDone }) {
-  const local = runtimes.defaultGemma;
+  const [local, setLocal] = useState(runtimes.defaultGemma);
   const [where, setWhere] = useState(cloud.allowed.has(s.id) ? "google" : "device");
   const [key, setKey] = useState(cloud.key);
   const [hide, setHide] = useState(true);
@@ -49,11 +50,14 @@ function Maker({ s, onDone }) {
     gemmaIsCached(local)
       .then(setCached)
       .catch(() => setCached(false));
-    return () => {
+  }, [local]);
+  useEffect(
+    () => () => {
       ctl.current?.abort();
       backendRef.current?.unload?.();
-    };
-  }, []);
+    },
+    [],
+  );
   const m = GEMMA[local];
   const stories = s.stories.map((st, i) => ({ title: st.title || `Story ${i + 1}`, text: storyText(st) })).filter((x) => x.text);
   const text = stories.map((x) => x.text).join("\n\n");
@@ -132,7 +136,7 @@ function Maker({ s, onDone }) {
                 <span class="size">{cached ? "ready" : `${mb(m.size)} once`}</span>
               </span>
               <span class="soft small">
-                Private. {m.label}. {runtimes.phone ? "Small, so the book is rougher." : "A few minutes on a laptop."}
+                Private. {m.label}. {m.size < 300e6 ? "Small, so the book is rougher." : "Several minutes on a laptop."}
               </span>
             </button>
             <button class="choice" role="radio" aria-pressed={where === "google"} aria-checked={where === "google"} onClick={() => setWhere("google")}>
@@ -150,6 +154,11 @@ function Maker({ s, onDone }) {
               <span class="soft small">Names and years found by simple rules. No retelling.</span>
             </button>
           </div>
+          {where === "device" && runtimes.gemma.length > 1 ? (
+            <button class="link small" onClick={() => setLocal(local === runtimes.gemma[0] ? runtimes.gemma[1] : runtimes.gemma[0])}>
+              {local === runtimes.gemma[0] ? `Slow computer? Use ${GEMMA[runtimes.gemma[1]].label} (${mb(GEMMA[runtimes.gemma[1]].size)}, rougher)` : `Use ${GEMMA[runtimes.gemma[0]].label} (${mb(GEMMA[runtimes.gemma[0]].size)}, better)`}
+            </button>
+          ) : null}
           {where === "device" && !cached ? (
             <p class="soft small">
               {mb(m.size)} is about {nairaFor(m.size)} of data. {advice.metered ? "You seem to be on mobile data; Wi-Fi is cheaper." : "It is kept for next time."}
@@ -217,7 +226,7 @@ function BookView({ s, onRemake }) {
               {b.people.map((p) => (
                 <li key={p.name}>
                   <strong>{p.name}</strong>
-                  {p.note ? `, ${p.note}` : ""}
+                  {p.note ? `, ${noteCase(p.note)}` : ""}
                 </li>
               ))}
             </ul>
@@ -232,7 +241,7 @@ function BookView({ s, onRemake }) {
               {b.places.map((p) => (
                 <li key={p.name}>
                   <strong>{p.name}</strong>
-                  {p.note ? `, ${p.note}` : ""}
+                  {p.note ? `, ${noteCase(p.note)}` : ""}
                 </li>
               ))}
             </ul>
