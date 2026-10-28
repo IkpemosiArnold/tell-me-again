@@ -9,7 +9,7 @@
 //   2. book step, once: a title for the whole book and questions to ask next time
 // A large model (Gemma 4 on the Gemini API, opt-in) gets bigger passages, same steps.
 
-import { appearsIn, fold, passages, sentences, wordCount } from "./text.js";
+import { COMMON, appearsIn, fold, passages, sentences, wordCount } from "./text.js";
 
 export const PASSAGE_SCHEMA = {
   type: "object",
@@ -217,16 +217,41 @@ export function groundPassage(raw, passage, { elder } = {}) {
   return { chapter: { title, retelling, quote }, people, places, moments, dropped };
 }
 
-export function groundBook(raw, chapters) {
+/** Names written with a capital after the first word of a question ("Who was Tari?" -> ["Tari"]). */
+function namesInQuestion(q) {
+  return q
+    .split(/\s+/)
+    .slice(1)
+    .map((w) => w.replace(/^[^\p{L}]+|[^\p{L}'’-]+$/gu, "").replace(/['’]s$/, ""))
+    .filter((w) => /^\p{Lu}/u.test(w) && w.length > 1 && !COMMON.has(fold(w)));
+}
+
+/**
+ * Clean the title and questions. With the transcript text, a question that names someone or
+ * somewhere the recording never mentions is left out, like everything else Gemma invents.
+ */
+export function groundBook(raw, chapters, text = null) {
   const r = raw && typeof raw === "object" ? raw : {};
+  const dropped = [];
   let title = str(r.title, 90).replace(/^["“”']+|["“”']+$/g, "");
   if (!title) title = chapters[0]?.title || "Our family's stories";
-  const questions = (Array.isArray(r.questions) ? r.questions : [])
-    .map((q) => str(q, 200))
-    .filter((q) => q.length > 8)
-    .map((q) => (/[?]$/.test(q) ? q : `${q.replace(/[.!]+$/, "")}?`))
-    .slice(0, 6);
-  return { title, questions };
+  const questions = [];
+  for (const raw of Array.isArray(r.questions) ? r.questions : []) {
+    let q = str(raw, 200);
+    if (q.length <= 8) continue;
+    if (!/[?]$/.test(q)) q = `${q.replace(/[.!]+$/, "")}?`;
+    if (text != null) {
+      const missing = namesInQuestion(q).find((n) => !appearsIn(n, text));
+      const year = yearsIn(q).find((y) => !yearsIn(text).includes(y));
+      if (missing || year) {
+        dropped.push({ kind: "question", value: q, why: `${missing ? `"${missing}"` : year} is not in the recording` });
+        continue;
+      }
+    }
+    questions.push(q);
+    if (questions.length >= 6) break;
+  }
+  return { title, questions, dropped };
 }
 
 function firstSentences(text, n) {
@@ -268,6 +293,7 @@ export function assembleBook({ elder, results, book, source, model, transcriptWo
     r.moments.forEach((m, j) => timeline.push({ ...m, chapter: i + 1, order: i * 100 + j }));
     dropped.push(...r.dropped.map((d) => ({ ...d, chapter: i + 1 })));
   });
+  dropped.push(...(book.dropped || []));
   // dated moments in year order first, then the undated ones in the order they were told
   const year = (m) => +(yearsIn(`${m.when} ${m.what}`)[0] || NaN);
   const dated = timeline.filter((m) => Number.isFinite(year(m))).sort((a, b) => year(a) - year(b) || a.order - b.order);
@@ -307,6 +333,7 @@ export async function makeBook({ text, elder, backend, passageWords = 450, onSte
   onStep?.({ step: of, of, label: "Writing the title and questions" });
   const chapters = results.map((r) => r.chapter);
   const bookAnswer = await backend.run(bookMessages({ chapters, elder }), BOOK_SCHEMA, 400);
-  const book = groundBook(parseJsonAnswer(bookAnswer), chapters);
+  // the storyteller's own name may not be said in the recording, but questions may use it
+  const book = groundBook(parseJsonAnswer(bookAnswer), chapters, `${text} ${elder?.name || ""}`);
   return assembleBook({ elder, results, book, source: backend.where, model: backend.model, transcriptWords: wordCount(text) });
 }

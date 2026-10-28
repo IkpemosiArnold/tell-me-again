@@ -4,12 +4,10 @@
 // It never retells anything.
 
 import { yearsIn } from "./book.js";
-import { fold, sentences, wordCount } from "./text.js";
+import { COMMON, fold, sentences, wordCount } from "./text.js";
 
-// capitalised words that are not names (sentence starters are skipped anyway)
-export const COMMON = new Set(
-  "i i'm i'll i've i'd god oh ok okay mr mrs miss dr sir ma madam chief alhaji alhaja mama papa baba iya oga monday tuesday wednesday thursday friday saturday sunday january february march april may june july august september october november december christmas easter english pidgin yoruba igbo hausa the a an and but so then".split(" "),
-);
+export { COMMON };
+
 
 /** Names written with a capital in the middle of a sentence ("we moved to Ibadan"). */
 export function capitalisedNames(text) {

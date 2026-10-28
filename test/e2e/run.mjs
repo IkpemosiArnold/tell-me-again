@@ -52,6 +52,7 @@ try {
     executablePath: process.env.CHROME_PATH || undefined,
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
+    colorScheme: process.env.E2E_SCHEME === "light" ? "light" : "dark",
     acceptDownloads: true,
     permissions: ["microphone"],
     args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream", `--use-file-for-fake-audio-capture=${wav}`, "--autoplay-policy=no-user-gesture-required"],
@@ -78,13 +79,15 @@ try {
           if (schema.required.includes("retelling")) {
             const p = passageOf(messages);
             const first = (p.match(/[^.!?]+[.!?]/) || [p])[0].trim();
-            const names = (p.match(/\b(Warri|Efe|Okoro|Tari)\b/gi) || []).map((x) => x[0].toUpperCase() + x.slice(1).toLowerCase());
+            // names as Whisper actually wrote them (it may hear "Warri" as "worry")
+            const place = (/born in ([\p{L}'-]+)/iu.exec(p) || [])[1];
+            const people = [...new Set(p.match(/(?<=[a-z,] )[A-Z][a-z]+/g) || [])].slice(0, 2);
             return JSON.stringify({
               title: "A house with a zinc roof",
               retelling: "She remembered her childhood home and the river.",
               quote: first,
-              people: [...new Set(names.filter((n) => n !== "Warri"))].map((name) => ({ name, who: "" })).concat([{ name: "Uncle Invented", who: "her uncle" }]),
-              places: names.includes("Warri") ? [{ name: "Warri", note: "where she was born" }] : [],
+              people: people.map((name) => ({ name, who: "" })).concat([{ name: "Uncle Invented", who: "her uncle" }]),
+              places: place ? [{ name: place, note: "where she was born" }] : [],
               moments: [{ when: "1999", what: "Something that never happened" }],
             });
           }
@@ -103,9 +106,9 @@ try {
   await page.getByRole("button", { name: "Start a session" }).click();
   await page.getByPlaceholder("Grandma, Baba, Aunty Ngozi").fill("Mama Efe");
   await page.getByRole("button", { name: "Yorùbá" }).click();
-  await page.getByText("You type it").waitFor();
+  await page.getByText("You type it", { exact: true }).waitFor();
   await page.getByRole("button", { name: "English" }).click();
-  await page.getByText("Useful draft").waitFor();
+  await page.getByText("Useful draft", { exact: true }).waitFor();
   await shot("02-who");
   await page.getByRole("button", { name: /Next/ }).click();
 
@@ -161,8 +164,12 @@ try {
   await page.waitForTimeout(800);
   await shot("11-book");
   const book = await page.locator("article.page").innerText();
-  assert.match(book, /Warri/);
-  assert.doesNotMatch(book.split("Left out")[0], /Uncle Invented|1999/);
+  const bornIn = (/born in ([\p{L}'-]+)/iu.exec(transcript) || [])[1];
+  assert.ok(bornIn && book.toLowerCase().includes(bornIn), `the birthplace as heard ("${bornIn}") is in the book`);
+  const kept = book.split("Left out")[0];
+  assert.doesNotMatch(kept, /Uncle Invented|1999/);
+  // the synthetic voice says "Tari"; when Whisper writes it another way, a question about Tari is not grounded
+  if (!/\btari\b/.test(transcript)) assert.doesNotMatch(kept, /Who was Tari\?/);
   await page.getByText(/^Left out:/).click();
   assert.match(await page.locator("article.page").innerText(), /Uncle Invented/);
   await shot("12-book-left-out");

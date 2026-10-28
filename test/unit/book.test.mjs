@@ -67,6 +67,12 @@ test("groundBook cleans questions", () => {
   assert.deepEqual(b.questions, ["What did Mama Ronke sell?", "Who was Kunle?"]);
 });
 
+test("a question that names someone the recording never mentions is left out", () => {
+  const b = groundBook({ title: "T", questions: ["Who was Tari?", "What did Mama Ronke sell at Itoku market?", "What happened in 1975?", "Did Uncle Invented visit?", "What was Grandma's first school?"] }, [], PASSAGE);
+  assert.deepEqual(b.questions, ["What did Mama Ronke sell at Itoku market?", "What was Grandma's first school?"]);
+  assert.deepEqual(b.dropped.map((d) => d.why), ['"Tari" is not in the recording', "1975 is not in the recording", '"Invented" is not in the recording']);
+});
+
 test("assembleBook merges people across chapters and orders the timeline by year", () => {
   const a = { chapter: { title: "A", retelling: "", quote: "" }, people: [{ name: "Kunle", note: "" }], places: [], moments: [{ when: "1960", what: "x" }, { when: "as a child", what: "y" }], dropped: [] };
   const b = { chapter: { title: "B", retelling: "", quote: "" }, people: [{ name: "kunle", note: "brother" }], places: [], moments: [{ when: "1948", what: "z" }], dropped: [{ kind: "person", value: "Q", why: "w" }] };
