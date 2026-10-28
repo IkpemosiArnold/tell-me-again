@@ -17,6 +17,7 @@
     "check": "npm test && npm run build"
   },
   "dependencies": {
+    "@fontsource-variable/literata": "^5.3.0",
     "@huggingface/transformers": "4.3.1",
     "@wllama/wllama": "3.8.1",
     "preact": "10.29.8"

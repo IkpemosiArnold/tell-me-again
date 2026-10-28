@@ -1,0 +1,44 @@
+# Render Blueprint for Tell Me Again: one FREE static site. Static sites use no instance
+# hours and never sleep, so this adds nothing to the workspace's 750 free hours.
+#
+# Bandwidth: the Hobby workspace includes 5 GB of outbound bandwidth a month, shared by every
+# service, and going over with no card on file suspends all free services. So this site
+# serves only the app (a few hundred KB, cached for a year under /assets). The models come
+# from Hugging Face and the WebAssembly runtimes from jsDelivr, never from here.
+#
+# Cross-origin isolation (COOP + COEP) lets ONNX Runtime and llama.cpp use several threads.
+# COEP is "require-corp", not "credentialless", which Safari ignores. Every cross-origin
+# request the page makes (Hugging Face, jsDelivr, the Gemini API) is a CORS fetch, which
+# "require-corp" allows.
+services:
+  - type: web
+    name: tellmeagain
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
+    headers:
+      - path: /*
+        name: Cross-Origin-Opener-Policy
+        value: same-origin
+      - path: /*
+        name: Cross-Origin-Embedder-Policy
+        value: require-corp
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: Permissions-Policy
+        value: microphone=(self), camera=(), geolocation=()
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
