@@ -111,7 +111,8 @@ function Maker({ s, onDone }) {
           setJob({ label, p: (step - 1) / of, detail: each ? `About ${Math.max(1, Math.round((each * (of - step + 1)) / 60))} min left` : "Gemma is reading" });
         },
       });
-      book.made.seconds = Math.round((performance.now() - t0) / 1000);
+      // a replayed answer (the demo video's test hook) reports how long the real run took
+      book.made.seconds = backend.replaySeconds ?? Math.round((performance.now() - t0) / 1000);
       if (backend.where === "google") book.made.namesHidden = hide;
       if (backend.threads) book.made.threads = backend.threads;
       book.made.isolated = !!globalThis.crossOriginIsolated;

@@ -47,6 +47,8 @@ try {
         where: "device",
         loaded: true,
         passageWords: 450,
+        // the real Gemma 3 1B run this answer comes from took 17 minutes
+        replaySeconds: 17 * 60,
         async load() {},
         async unload() {},
         async run(messages, schema) {
@@ -110,7 +112,7 @@ try {
   mark("names");
   await slow(2500);
   // the storyteller's own name, misheard; fixing it does not change Gemma's replayed answer
-  const row = page.locator(".item").filter({ has: page.locator(".name", { hasText: /^Marmauve$|^Marmouve$/ }) });
+  const row = page.locator(".item").filter({ has: page.locator(".name", { hasText: /^Marm/ }) });
   if (await row.count()) {
     await row.getByRole("button", { name: "Fix" }).click();
     await slow(600);

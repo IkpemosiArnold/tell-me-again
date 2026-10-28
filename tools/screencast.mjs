@@ -40,5 +40,5 @@ export function toVideo(frames, out, endT) {
   });
   lines.push(`file '${frames[frames.length - 1].name}'`);
   writeFileSync(list, lines.join("\n"));
-  execFileSync("ffmpeg", ["-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", list, "-vf", "scale=780:1688:force_original_aspect_ratio=decrease,pad=780:1688:(ow-iw)/2:(oh-ih)/2:color=0x12162b,fps=30,format=yuv420p", "-c:v", "libx264", out], { stdio: "inherit" });
+  execFileSync("ffmpeg", ["-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", list, "-vf", "scale=780:1688:force_original_aspect_ratio=decrease,pad=780:1688:(ow-iw)/2:(oh-ih)/2:color=0x12162b,fps=24,format=yuv420p", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", out], { stdio: "inherit" });
 }
