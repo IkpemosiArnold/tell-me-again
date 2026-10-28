@@ -2,7 +2,7 @@
 title: Tell Me Again: my phone can't write Yorùbá yet, so it keeps Grandma's voice instead
 published: false
 tags: devchallenge, hf26challenge, ai, opensource
-cover_image: [PENDING: docs/screens/cover.png]
+cover_image: [UPLOAD: docs/screens/cover.png]
 ---
 
 <!--
@@ -62,7 +62,7 @@ Even in English the names suffer. In my test recording (a synthetic voice readin
 
 [VIDEO: docs/demo/tell-me-again-demo.mp4, about a minute. A synthetic voice reads a made-up story about a made-up Mama Efe; no real person is in it. Whisper runs live. The story book step replays the answer Gemma 3 1B gave for this story on my laptop (it took 17 minutes, so the video skips the wait, and says so), and the new checks run on it live.]
 
-[SCREENSHOT: docs/screens/11-book.png. Caption: "The story book, and what Gemma said that the recording doesn't."]
+[SCREENSHOT: docs/screens/after-book.png. Caption: "The story book. Places show the sentence they were heard in, not what the model knows about them."]
 
 ## Code
 
@@ -89,7 +89,7 @@ Then I ran the real Gemma 3 1B on my made-up Mama Efe, and every one of those ch
 - It moved the family to Lagos in 1980. They moved in 1978; 1980 is when her son was born.
 - It described Warri as "a small village in Nigeria" and Lagos as "a major port city". Nobody said either.
 
-[SCREENSHOT: docs/screens/before-gemma-1b-book.png and docs/screens/after-book.png side by side. Caption: "Before and after the checks. Same story, same model."]
+[SCREENSHOT: docs/screens/before-gemma-1b-book.png and docs/screens/after-book-left-out.png side by side. Caption: "Before and after the stricter checks. Same story, same Gemma 3 1B answer. Six things it said are now under Left out."]
 
 Every name and year was in the transcript, just never together, and the descriptions came from what the model knows about Nigeria, not from what she said. The ghost wasn't inventing people. It was rearranging real ones and filling gaps with general knowledge, which is worse, because it sounds right.
 
@@ -107,7 +107,7 @@ Whisper has its own ghosts. It heard Warri as "worry", Surulere as "Sierra Leer"
 
 **Render.** The site is a free Render static site. I chose static on purpose: my Render workspace shares its free instance hours with other services, including a client's, and a static site uses none and never sleeps. The workspace also shares 5 GB of bandwidth a month across every service, so the site serves only the app itself, about 250 KB on a first visit. The models come from Hugging Face and the WebAssembly runtimes from jsDelivr. The site sends cross-origin isolation headers so those runtimes can use more than one thread.
 
-**Tests.** 67 unit tests (the grounding checks, the zip writer, the resumable downloader, the name stand-ins) and an end-to-end test that runs the whole flow in Chromium with a fake microphone: consent, a 34-second recording, Whisper writing it down, the book, the archive, and opening the archive again. The test's stand-in for Gemma invents an uncle and a year on purpose, and the test fails if either reaches the book.
+**Tests.** 68 unit tests (the grounding checks, the zip writer, the resumable downloader, the name stand-ins) and an end-to-end test that runs the whole flow in Chromium with a fake microphone: consent, a 34-second recording, Whisper writing it down, the book, the archive, and opening the archive again. The test's stand-in for Gemma invents an uncle and a year on purpose, and the test fails if either reaches the book.
 
 The test voice is macOS's synthetic "Daniel" reading a made-up story about a made-up Mama Efe from Warri. Nothing in the repo, the demo or this post is a real person's voice or story.
 

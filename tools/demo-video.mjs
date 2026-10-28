@@ -61,11 +61,14 @@ try {
   const page = ctx.pages()[0] || (await ctx.newPage());
   page.on("pageerror", (e) => console.log("PAGE ERROR", e.message));
   const slow = (ms = 900) => page.waitForTimeout(ms);
+  // full-resolution stills for the post (the screencast frames are 1x)
+  const still = (name) => page.screenshot({ path: path.join(out, `${name}.png`) });
   const cast = await startScreencast(page, path.join(out, "frames"));
   t0 = cast.t0 * 1000;
   await page.goto(base);
   mark("home");
   await slow(2200);
+  await still("01-home");
   await page.locator(".lamp").click();
   await slow(1400);
   await page.getByRole("button", { name: "Start a session" }).click();
@@ -74,11 +77,13 @@ try {
   await slow(600);
   await page.getByRole("button", { name: "Yorùbá" }).click();
   await slow(1800);
+  await still("02-who-yoruba");
   await page.getByRole("button", { name: "English" }).click();
   await slow(900);
   await page.getByRole("button", { name: /Next/ }).click();
   await slow(2000);
   mark("consent");
+  await still("03-consent");
   await page.getByRole("button", { name: "Record their yes" }).click();
   mark("consentRecord");
   await slow(3500);
@@ -88,7 +93,9 @@ try {
   await slow(800);
   await page.getByRole("button", { name: "Start recording" }).click();
   mark("storyRecord");
-  await slow(30000);
+  await slow(12000);
+  await still("05-recording");
+  await slow(18000);
   await page.getByRole("button", { name: /Need a question/ }).click();
   await slow(70000);
   await page.getByRole("button", { name: "Finish" }).click();
@@ -103,6 +110,7 @@ try {
   mark("written");
   await page.locator(".item").first().click();
   await slow(3000);
+  await still("08-story");
   await page.mouse.wheel(0, 300);
   await slow(2000);
   await page.getByRole("button", { name: "Back" }).click();
@@ -111,6 +119,7 @@ try {
   await page.getByRole("heading", { name: "Did they say these names?" }).waitFor();
   mark("names");
   await slow(2500);
+  await still("09-names");
   // the storyteller's own name, misheard; fixing it does not change Gemma's replayed answer
   const row = page.locator(".item").filter({ has: page.locator(".name", { hasText: /^Marm/ }) });
   if (await row.count()) {
