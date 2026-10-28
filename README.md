@@ -83,6 +83,13 @@ The end-to-end test needs a Chromium that Playwright can drive (`npx playwright-
 
 The sample voice is macOS's synthetic "Daniel" reading a made-up story (`test/fixtures/synthetic-story.txt`). No real person's voice or story is in this repository.
 
+### Tools
+
+- `tools/demo-video.mjs` records the demo at phone size with the synthetic story as the microphone, and `tools/edit-demo.mjs` cuts it to about a minute. The story book step in the demo replays Gemma 3 1B's real answer for that story (`docs/screens/gemma-3-1b-answer.json`), because the real call took 17 minutes; the video says so.
+- `tools/real-run.mjs` puts one recording through the app with the real models. With `PRIVATE=1` it takes no screenshots and deletes the session afterwards, for testing with a family's own recordings on your own machine.
+- `tools/phone-check.mjs` checks phone sizes: no sideways scroll, 17 px text, tap targets, words above the fold.
+- `tools/cards.mjs` draws the video's title cards and the cover image.
+
 ## Deploy
 
 `render.yaml` describes one free Render static site: no instance hours, never sleeps. It sends COOP and COEP headers so the WebAssembly runtimes can use threads, and it serves only the app itself (about 250 KB on a first visit). Models and runtimes come from Hugging Face and jsDelivr, so the site uses almost none of the workspace's monthly bandwidth.
