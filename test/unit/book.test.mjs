@@ -48,6 +48,13 @@ test("groundPassage keeps what the transcript says and drops what it does not", 
   assert.ok(kinds.some((k) => k.startsWith("moment:1955")));
 });
 
+test("a 'person' only ever named after in/at/to/from is moved to places", () => {
+  const text = "Your father was born in Surulere in 1980. Daniel worked at the port in Apapa. Daniel was kind.";
+  const g = groundPassage({ title: "t", retelling: "r", quote: "", people: [{ name: "Surulere", who: "" }, { name: "Daniel", who: "husband" }, { name: "Apapa", who: "" }], places: [{ name: "Apapa", note: "the port" }], moments: [] }, text);
+  assert.deepEqual(g.people.map((p) => p.name), ["Daniel"]);
+  assert.deepEqual(g.places.map((p) => p.name).sort(), ["Apapa", "Surulere"]);
+});
+
 test("an invented quote is dropped, a missing title falls back to the first words", () => {
   const g = groundPassage({ quote: "We were very rich.", people: "nonsense" }, PASSAGE);
   assert.equal(g.chapter.quote, "");

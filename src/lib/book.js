@@ -181,8 +181,20 @@ export function groundPassage(raw, passage, { elder } = {}) {
     return out;
   };
 
-  const people = named(r.people, "person", 6);
+  let people = named(r.people, "person", 6);
   const places = named(r.places, "place", 6);
+  // "born in Surulere": a "person" the transcript only ever puts after in/at/to/from is a place
+  // (small models, and any model reading N1-style stand-ins, mix these up)
+  const placeKeys = new Set(places.map((p) => fold(p.name)));
+  people = people.filter((p) => {
+    if (placeKeys.has(fold(p.name))) return false;
+    if (looksLikePlace(p.name, passage)) {
+      places.push({ name: p.name, note: "" });
+      placeKeys.add(fold(p.name));
+      return false;
+    }
+    return true;
+  });
 
   let quote = str(r.quote, 300).replace(/^["“”']+|["“”']+$/g, "");
   if (quote && !appearsIn(quote, passage)) {
@@ -230,6 +242,23 @@ function namesInQuestion(q) {
  * Clean the title and questions. With the transcript text, a question that names someone or
  * somewhere the recording never mentions is left out, like everything else Gemma invents.
  */
+/** True when every mention of `name` in the text comes right after in, at, to, from or near. */
+export function looksLikePlace(name, text) {
+  const n = fold(name);
+  const t = ` ${fold(text)} `;
+  let i = t.indexOf(` ${n} `);
+  if (i < 0) return false;
+  let all = 0;
+  let after = 0;
+  while (i >= 0) {
+    all++;
+    const before = t.slice(Math.max(0, i - 6), i);
+    if (/\b(in|at|to|from|near)$/.test(before)) after++;
+    i = t.indexOf(` ${n} `, i + 1);
+  }
+  return after === all;
+}
+
 export function groundBook(raw, chapters, text = null) {
   const r = raw && typeof raw === "object" ? raw : {};
   const dropped = [];
