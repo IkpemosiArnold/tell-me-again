@@ -54,6 +54,20 @@ Google's free tier may keep that text and have people read it to improve its pro
 
 Phones never get the 722 MB model: iOS closes a tab's process well before the phone runs out of memory, and a 722 MB model crashed an iPhone tab in Selects. Downloads are resumable (byte ranges kept as they arrive), so a dropped connection carries on instead of starting again, and the page shows megabytes, a rough naira cost of the data, and a Stop button.
 
+## Measured (28 Oct 2026, 2017 MacBook Pro, Intel i5-7360U, 2 cores, shared with other work)
+
+The test story is a synthetic voice reading a made-up 98-second, 330-word story (`docs/demo/demo-story.txt`).
+
+| Step | Time |
+|---|---|
+| Download Whisper base (136 MB) | 76 s |
+| Whisper base writes down the 98 s story | 63 s (Chrome 156), 77 s (Chromium 136) |
+| Download Gemma 3 1B (722 MB) | about 6.5 min |
+| Gemma 3 1B makes the book (one passage + title and questions), one thread | 17 min |
+| Gemma 4 26B on the Gemini API makes the book, names hidden | 18 to 54 s |
+
+wllama gave llama.cpp one thread on this 2-core laptop (it uses half of `navigator.hardwareConcurrency`, which is 2 here); the app now asks for two. Machines with more cores should be faster; that is not measured yet.
+
 ## Run it
 
 ```sh
