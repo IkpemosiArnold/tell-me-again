@@ -60,11 +60,12 @@ export function explainGeminiError(status, message = "") {
   if (status === 400 && /api key|api_key/i.test(message)) return { message: "Google did not accept that key.", hint: "Copy the key again from aistudio.google.com/apikey. New keys must be restricted to the Gemini API." };
   if (status === 401 || status === 403) return { message: "Google did not accept that key.", hint: "Check the key in AI Studio. It must be allowed to use the Gemini API." };
   if (status === 429) return { message: "Google's free limit is used up for now.", hint: "Wait a minute and try again, or make the book on this device instead." };
-  if (status === 0) return { message: "Could not reach Google.", hint: "Check the connection and try again. Nothing was sent." };
+  if (status === 0) return { message: "Could not reach Google.", hint: "Check the connection and try again." };
   return { message: `Google answered with an error (${status}).`, hint: message.slice(0, 160) || "Try again in a minute." };
 }
 
-export async function geminiGenerate({ key, model, messages, schema, maxTokens, temperature, fetchImpl = globalThis.fetch, timeoutMs = 60000, base = GEMINI_BASE, signal }) {
+export async function geminiGenerate({ key, model, messages, schema, maxTokens, temperature, fetchImpl = globalThis.fetch, timeoutMs = 90000, base = GEMINI_BASE, signal }) {
+  let timeouts = 0;
   const feats = {};
   for (let tries = 0; tries < 5; tries++) {
     const ctl = new AbortController();
@@ -84,6 +85,11 @@ export async function geminiGenerate({ key, model, messages, schema, maxTokens, 
       text = await res.text();
     } catch (e) {
       if (signal?.aborted) throw Object.assign(new Error("Stopped."), { name: "AbortError" });
+      // the free tier sometimes takes minutes: one more try, then say so plainly
+      if (ctl.signal.aborted) {
+        if (++timeouts < 2) continue;
+        throw Object.assign(new Error("Google's free Gemma did not answer in time."), { status: 0, hint: "It is busy. Try again in a few minutes, or make the book on this device." });
+      }
       const ex = explainGeminiError(0);
       throw Object.assign(new Error(ex.message), { status: 0, hint: ex.hint, cause: e });
     } finally {

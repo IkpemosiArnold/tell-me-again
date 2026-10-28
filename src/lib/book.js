@@ -326,14 +326,21 @@ export async function makeBook({ text, elder, backend, passageWords = 450, onSte
   for (let i = 0; i < parts.length; i++) {
     signal?.throwIfAborted?.();
     onStep?.({ step: i + 1, of, label: `Reading part ${i + 1} of ${parts.length}` });
-    const answer = await backend.run(passageMessages({ passage: parts[i], elder, index: i, total: parts.length }), PASSAGE_SCHEMA, 700);
-    results.push(groundPassage(parseJsonAnswer(answer), parts[i], { elder }));
+    const msgs = passageMessages({ passage: parts[i], elder, index: i, total: parts.length });
+    // an answer that is not JSON (cut off, or chatty) gets one more try
+    let data = parseJsonAnswer(await backend.run(msgs, PASSAGE_SCHEMA, 700));
+    if (!data) {
+      signal?.throwIfAborted?.();
+      data = parseJsonAnswer(await backend.run(msgs, PASSAGE_SCHEMA, 700));
+    }
+    results.push(groundPassage(data, parts[i], { elder }));
   }
   signal?.throwIfAborted?.();
   onStep?.({ step: of, of, label: "Writing the title and questions" });
   const chapters = results.map((r) => r.chapter);
-  const bookAnswer = await backend.run(bookMessages({ chapters, elder }), BOOK_SCHEMA, 400);
+  let bookAnswer = parseJsonAnswer(await backend.run(bookMessages({ chapters, elder }), BOOK_SCHEMA, 400));
+  if (!bookAnswer) bookAnswer = parseJsonAnswer(await backend.run(bookMessages({ chapters, elder }), BOOK_SCHEMA, 400));
   // the storyteller's own name may not be said in the recording, but questions may use it
-  const book = groundBook(parseJsonAnswer(bookAnswer), chapters, `${text} ${elder?.name || ""}`);
+  const book = groundBook(bookAnswer, chapters, `${text} ${elder?.name || ""}`);
   return assembleBook({ elder, results, book, source: backend.where, model: backend.model, transcriptWords: wordCount(text) });
 }

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Bar, ErrorNote, Progress, Why, bytesDetail, go, saveFile, toast, useWakeLock } from "./common.jsx";
 import { deleteSession, getBlob, getSession, newId, putBlob, saveSession } from "../store/db.js";
 import { LANGUAGES, planFor } from "../lib/languages.js";
-import { clock } from "../lib/text.js";
+import { clock, replaceWord } from "../lib/text.js";
 import { fmtDate, nairaFor, runtimes } from "../state.js";
 import { onWriter, stopWriting, toWrite, writeDown, writerState } from "./writer.js";
 import { buildArchive, archiveName } from "../lib/archive.js";
@@ -125,10 +125,18 @@ export function Session({ id }) {
     if (!f) return;
     setBusy("Adding the recording");
     try {
-      // read its length (and check this browser can play it) before keeping it
-      const pcm = await decodeToMono(f);
-      const story = { id: newId("t"), blobId: newId("b"), mime: f.type || "audio/mp4", seconds: pcm.length / 16000, lang: s.lang, at: new Date().toISOString(), title: f.name.replace(/\.[^.]+$/, "").slice(0, 60), transcript: null, typed: "", imported: true };
-      await putBlob(story.blobId, f);
+      let keep = { blob: f, mime: f.type || "audio/mp4", seconds: 0 };
+      const { isVideoLike, extractAudio } = await import("../engine/extract.js");
+      if (isVideoLike(f)) {
+        // keep only the sound: a phone video is mostly picture
+        setBusy("Taking the sound from the video");
+        keep = await extractAudio(f, { onProgress: (p) => setBusy(`Taking the sound from the video (${Math.round(p * 100)}%)`) });
+      } else {
+        // read its length, and check this browser can play it, before keeping it
+        keep.seconds = (await decodeToMono(f)).length / 16000;
+      }
+      const story = { id: newId("t"), blobId: newId("b"), mime: keep.mime, seconds: keep.seconds, lang: s.lang, at: new Date().toISOString(), title: f.name.replace(/\.[^.]+$/, "").slice(0, 60), transcript: null, typed: "", imported: true };
+      await putBlob(story.blobId, keep.blob);
       s.stories.push(story);
       await saveSession(s);
       reload();
@@ -274,11 +282,55 @@ export function Story({ id, storyId }) {
         </div>
       ) : null}
       {st.transcript && !live ? <p class="soft small">Tap a line to fix it. Tap a time to hear that part.</p> : null}
+      {st.transcript && !live ? <FixName s={s} onDone={() => setS({ ...s })} /> : null}
       <label class="field">
         {plan.transcribe ? "Notes, or anything the model missed" : "What was said, or a summary in English"}
         <textarea value={st.typed} onChange={(e) => update({ typed: e.target.value })} placeholder={plan.transcribe ? "Optional" : "Type it as they said it, or in English. The story book is made from this."} />
       </label>
     </main>
+  );
+}
+
+/** "Worry" should be "Warri": fix a misheard name in every story of the session at once. */
+function FixName({ s, onDone }) {
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const fix = async () => {
+    let n = 0;
+    for (const st of s.stories) {
+      if (st.transcript?.lines) {
+        st.transcript.lines = st.transcript.lines.map((l) => {
+          const r = replaceWord(l.text, from, to.trim());
+          n += r.n;
+          return r.n ? { ...l, text: r.text } : l;
+        });
+        if (n) st.transcript.edited = true;
+      }
+      if (st.typed) {
+        const r = replaceWord(st.typed, from, to.trim());
+        n += r.n;
+        st.typed = r.text;
+      }
+    }
+    await saveSession(s);
+    toast(n ? `Fixed ${n} ${n === 1 ? "time" : "times"}` : `"${from.trim()}" was not found`);
+    if (n) {
+      setFrom("");
+      setTo("");
+    }
+    onDone();
+  };
+  return (
+    <Why label="A name came out wrong?">
+      <div class="stack">
+        <p>Fix it once, and it is fixed in every story of this session.</p>
+        <input type="text" value={from} onInput={(e) => setFrom(e.target.value)} placeholder="What it wrote, like Worry" aria-label="What it wrote" autocomplete="off" />
+        <input type="text" value={to} onInput={(e) => setTo(e.target.value)} placeholder="What they said, like Warri" aria-label="What they said" autocomplete="off" autocapitalize="words" />
+        <button class="btn wide" onClick={fix} disabled={!from.trim() || !to.trim()}>
+          Fix it everywhere
+        </button>
+      </div>
+    </Why>
   );
 }
 

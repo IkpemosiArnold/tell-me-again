@@ -29,6 +29,15 @@ export function hideNames(text, { extra = [] } = {}) {
   return { text: out, map };
 }
 
+/** Swap the names in `map` (from hideNames) for their stand-ins in another text. */
+export function applyNames(text, map) {
+  let out = String(text || "");
+  for (const [token, name] of [...map].sort((a, b) => b[1].length - a[1].length)) {
+    out = out.replace(new RegExp(`(?<![\\p{L}\\p{N}])${escapeRe(name)}(?![\\p{L}\\p{N}])`, "gu"), token);
+  }
+  return out;
+}
+
 /** Put the names back into every string inside value (objects, arrays, strings). */
 export function restoreNames(value, map) {
   if (!map?.length) return value;

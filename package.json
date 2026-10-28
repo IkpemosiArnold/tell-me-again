@@ -20,6 +20,7 @@
     "@fontsource-variable/literata": "^5.3.0",
     "@huggingface/transformers": "4.3.1",
     "@wllama/wllama": "3.8.1",
+    "mediabunny": "^1.61.5",
     "preact": "10.29.8"
   },
   "devDependencies": {

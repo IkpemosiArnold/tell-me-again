@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { hideNames, restoreNames } from "../../src/lib/redact.js";
+import { applyNames, hideNames, restoreNames } from "../../src/lib/redact.js";
 
 const T = "I was born in Abeokuta in 1948. My mother, Mama Ronke, sold cloth. Ronke was strong. We later went to Ibadan.";
 
@@ -22,4 +22,12 @@ test("restoreNames walks objects and does not confuse N1 with N12", () => {
 test("a round trip gives the original text back", () => {
   const { text, map } = hideNames(T);
   assert.equal(restoreNames(text, map), T);
+});
+
+test("names found in the transcript are swapped in the instructions too, and nothing else is", () => {
+  const { map } = hideNames(T, { extra: ["Grandma Adunni"] });
+  const prompt = "Transcript of Grandma Adunni. Mama Ronke is her mother, from Abeokuta.";
+  const out = applyNames(prompt, map);
+  assert.match(out, /^Transcript of Grandma Adunni\./, "a name not in the transcript and the word Transcript stay");
+  assert.doesNotMatch(out, /Ronke|Abeokuta/);
 });

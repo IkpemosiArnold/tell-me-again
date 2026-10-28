@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { appearsIn, clock, fileSafe, fold, passages, sentences, wordCount } from "../../src/lib/text.js";
+import { appearsIn, clock, fileSafe, fold, passages, replaceWord, sentences, wordCount } from "../../src/lib/text.js";
 
 test("fold removes tone marks and Hausa hooked letters", () => {
   assert.equal(fold("Ọ̀ṣun!"), "osun");
@@ -37,4 +37,13 @@ test("clock and fileSafe", () => {
   assert.equal(clock(3725), "1:02:05");
   assert.equal(fileSafe('Mama: "Ìtàn"/1'), "Mama Ìtàn1");
   assert.equal(fileSafe("   "), "story");
+});
+
+test("replaceWord fixes a misheard name everywhere, whole words only", () => {
+  const r = replaceWord("Born in Worry. Worry was loud, not worrying.", "worry", "Warri");
+  assert.equal(r.text, "Born in Warri. Warri was loud, not worrying.");
+  assert.equal(r.n, 2);
+  assert.equal(replaceWord("Ben and City", "Ben and City", "Benin City").text, "Benin City");
+  assert.equal(replaceWord("a (b) c", "(b)", "x").text, "a (b) c".replace("(b)", "x"));
+  assert.equal(replaceWord("x", "", "y").n, 0);
 });

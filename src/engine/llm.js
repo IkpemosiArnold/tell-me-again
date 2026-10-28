@@ -10,7 +10,7 @@ import { GEMMA, gemmaUrl } from "./models.js";
 import { opfsStore, memoryStore, resumableDownload } from "./download.js";
 import { keepStored } from "./devices.js";
 import { geminiGenerate } from "./gemini.js";
-import { hideNames, restoreNames } from "../lib/redact.js";
+import { applyNames, hideNames, restoreNames } from "../lib/redact.js";
 
 // llama.cpp's WebAssembly comes from jsDelivr, pinned to the installed wllama version, so this
 // site serves only its own few hundred KB. Safari (no JSPI or memory64) gets wllama's compat
@@ -96,15 +96,18 @@ export function geminiBackend({ key, model = "gemma-4-26b-a4b-it", hide = true, 
       let map = [];
       let send = messages;
       if (hide) {
-        // the same stand-ins across the system and user messages of one call
-        const joined = messages.map((x) => x.content).join("\n\u0000\n");
-        const h = hideNames(joined, { extra: [elderName] });
-        map = h.map;
-        const back = h.text.split("\n\u0000\n");
-        send = messages.map((x, i) => ({ ...x, content: back[i] }));
+        // names are found in the transcript only (not in the instructions), then swapped
+        // the same way in every message of the call
+        const quoted = messages.map((x) => (/"""([\s\S]*?)"""/.exec(x.content) || [])[1]).filter(Boolean).join("\n");
+        const source = quoted || messages.filter((x) => x.role !== "system").map((x) => x.content).join("\n");
+        map = hideNames(source, { extra: [elderName] }).map;
+        // the storyteller's name is always swapped, said in the recording or not
+        const elder = String(elderName || "").trim();
+        if (elder && !map.some(([, n]) => n === elder)) map.push([`N${map.length + 1}`, elder]);
+        send = messages.map((x) => ({ ...x, content: applyNames(x.content, map) }));
       }
       onSend?.(send);
-      const text = await geminiGenerate({ key, model, messages: send, schema, maxTokens: Math.max(800, maxTokens * 2), temperature: 0.3 });
+      const text = await geminiGenerate({ key, model, messages: send, schema, maxTokens: Math.max(1500, maxTokens * 3), temperature: 0.3 });
       return hide ? restoreNames(text, map) : text;
     },
     async unload() {},

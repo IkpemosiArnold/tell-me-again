@@ -105,6 +105,23 @@ test("makeBook runs one call per passage plus one for the book", async () => {
   await assert.rejects(makeBook({ text: "  ", backend }), /no transcript/);
 });
 
+test("an answer that is not JSON is asked for once more", async () => {
+  let n = 0;
+  const backend = {
+    where: "device",
+    model: "flaky",
+    async run(messages, schema) {
+      n++;
+      if (n === 1) return '{"title": "cut off mid';
+      if (schema.required.includes("retelling")) return JSON.stringify({ title: "Second try", retelling: "r", quote: "", people: [], places: [], moments: [] });
+      return '{"title":"T","questions":[]}';
+    },
+  };
+  const book = await makeBook({ text: PASSAGE, backend });
+  assert.equal(n, 3);
+  assert.equal(book.chapters[0].title, "Second try");
+});
+
 test("the passage prompt forbids invention and names the speaker", () => {
   const m = passageMessages({ passage: "x", elder: { name: "Grandpa Obi" }, index: 0, total: 2 });
   assert.match(m[0].content, /Never invent/);

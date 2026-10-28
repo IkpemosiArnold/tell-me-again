@@ -94,3 +94,13 @@ export function escapeHtml(s) {
 export const COMMON = new Set(
   "i i'm i'll i've i'd god oh ok okay mr mrs miss dr sir ma madam chief alhaji alhaja mama papa baba iya oga grandma grandpa grandmother grandfather granny aunty auntie aunt uncle monday tuesday wednesday thursday friday saturday sunday january february march april may june july august september october november december christmas easter english pidgin yoruba igbo hausa the a an and but so then".split(" "),
 );
+
+/** Replace a whole word or phrase everywhere, ignoring case: fixName("born in Worry", "worry", "Warri"). */
+export function replaceWord(text, from, to) {
+  const f = String(from || "").trim();
+  if (!f) return { text, n: 0 };
+  const re = new RegExp(`(?<![\\p{L}\\p{N}])${f.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\p{N}])`, "giu");
+  let n = 0;
+  const out = String(text || "").replace(re, () => (n++, to));
+  return { text: out, n };
+}
