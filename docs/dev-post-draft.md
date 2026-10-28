@@ -97,6 +97,8 @@ So the checks got stricter. A note about a person or place is kept only if one s
 
 Whisper has its own ghosts. It heard Warri as "worry", Surulere as "Sierra Leer" and Benin City as "Ben and City", and then Gemma built the book on "Worry". So before Gemma reads anything, the app lists every name it heard, each with the sentence it came from, and asks "Did they say these names?" Fix "Worry" to "Warri" once and it's fixed in every story.
 
+[SCREENSHOT: docs/screens/09-names.png. Caption: "Did they say these names? Each one with the sentence it was heard in."]
+
 **The opt-in.** On a phone, a 242 MB model writes a rougher book. So there's a second option: Gemma 4 on Google's free Gemini API, with your own free key from AI Studio (no card needed). The page tells you plainly that Google's free tier may keep the text and have people read it, quoting their terms. It sends text only, never audio, and swaps the names for stand-ins (N1, N2) before sending and back after. The key lives in the tab's memory and is gone when you close it. You have to tick "Send this session's text to Google, this time only" every session.
 
 **iPhone and data realities.** I learned these the hard way on my last project:
