@@ -80,7 +80,7 @@ It's a static site: Preact and Vite, no backend. Everything heavy happens in the
 
 On my 2017 MacBook Pro (2 cores, and busy with other work at the time), Whisper base wrote down the 98-second test story in 63 seconds. Gemma 3 1B took 17 minutes for the whole book, partly because llama.cpp was running on one thread: wllama uses half of the cores the browser reports, and this laptop reports 2. It now asks for two. [PENDING: the time with two threads.] Gemma 4 on Google's API took 18 to 54 seconds. A slow computer can also pick the 242 MB Gemma, which is rougher and quicker.
 
-**The ghost in the machine.** Small models make things up, and in a family archive that is not a quirk. It's a lie about your grandmother that will outlive her. So my first version kept nothing Gemma wrote about a person, place, year or quote unless it appeared in the transcript. A quote had to be word for word, a year had to have been said, and a question for next time couldn't ask about someone the recording never mentions.
+**The ghost in the machine.** Small models make things up. In a family archive, a made-up detail about your grandmother can outlive her. So my first version kept nothing Gemma wrote about a person, place, year or quote unless it appeared in the transcript. A quote had to be word for word, a year had to have been said, and a question for next time couldn't ask about someone the recording never mentions.
 
 Then I ran the real Gemma 3 1B on my made-up Mama Efe, and every one of those checks passed. The book was still wrong:
 
@@ -91,7 +91,7 @@ Then I ran the real Gemma 3 1B on my made-up Mama Efe, and every one of those ch
 
 [SCREENSHOT: docs/screens/before-gemma-1b-book.png and docs/screens/after-book-left-out.png side by side. Caption: "Before and after the stricter checks. Same story, same Gemma 3 1B answer. Six things it said are now under Left out."]
 
-Every name and year was in the transcript, just never together, and the descriptions came from what the model knows about Nigeria, not from what she said. The ghost wasn't inventing people. It was rearranging real ones and filling gaps with general knowledge, which is worse, because it sounds right.
+Every name and year was in the transcript, just never together, and the descriptions came from what the model knows about Nigeria, not from what she said. So the ghost wasn't inventing people. It was moving real ones around and filling the gaps with general knowledge, which is harder to spot because it sounds right.
 
 So the checks got stricter. A note about a person or place is kept only if one sentence that names them says the same thing, so "her father" survives and "a major port city" doesn't. A moment's year, names and words must be said in the same sentence. Where a place has no note left, the book shows the sentence it was heard in instead. Everything removed goes under "Left out", so the family can see what the model tried to add and decide for themselves.
 
