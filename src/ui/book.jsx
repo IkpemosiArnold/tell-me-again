@@ -5,6 +5,7 @@ import { useSession } from "./session.jsx";
 import { saveSession, getBlob } from "../store/db.js";
 import { storyText } from "../lib/bookhtml.js";
 import { noteCase } from "../lib/text.js";
+import { fixNameEverywhere, namesToCheck } from "../lib/names.js";
 import { makeBook } from "../lib/book.js";
 import { makeOutline } from "../lib/outline.js";
 import { buildArchive, archiveName } from "../lib/archive.js";
@@ -21,6 +22,17 @@ export function Book({ id }) {
   if (s === false) return null;
   if (!s) return null;
   if (s.book && !remake) return <BookView s={s} onRemake={() => setRemake(true)} />;
+  if (!s.namesChecked && namesToCheck(s).length)
+    return (
+      <NameCheck
+        s={s}
+        onDone={async () => {
+          s.namesChecked = true;
+          await saveSession(s);
+          setS({ ...s });
+        }}
+      />
+    );
   return (
     <Maker
       s={s}
@@ -196,6 +208,56 @@ function Maker({ s, onDone }) {
   );
 }
 
+/** "Did she say...?": every name in the transcript, with where it was heard, before Gemma reads it. */
+function NameCheck({ s, onDone }) {
+  const [list, setList] = useState(() => namesToCheck(s));
+  const [open, setOpen] = useState(null);
+  const [to, setTo] = useState("");
+  const fix = async (name) => {
+    const n = fixNameEverywhere(s, name, to);
+    await saveSession(s);
+    toast(n ? `${name} is now ${to.trim()}, ${n} ${n === 1 ? "time" : "times"}` : "Nothing changed");
+    setOpen(null);
+    setTo("");
+    setList(namesToCheck(s));
+  };
+  return (
+    <main class="screen">
+      <Bar to={`/s/${s.id}`} title={s.elder.name ? `${s.elder.name}'s stories` : "The stories"} />
+      <h2>Did they say these names?</h2>
+      <p class="soft">The phone often mishears names. Fix any that look wrong, so the book gets them right.</p>
+      <div class="list">
+        {list.map((x) => (
+          <div class="item" key={x.name} style={{ flexDirection: "column", alignItems: "stretch" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+              <span class="grow">
+                <span class="name">{x.name}</span>
+                <br />
+                <span class="meta">{x.said}</span>
+              </span>
+              <button class="btn quiet" onClick={() => (setOpen(open === x.name ? null : x.name), setTo(""))} aria-expanded={open === x.name}>
+                Fix
+              </button>
+            </div>
+            {open === x.name ? (
+              <div class="stack" style={{ marginTop: 10 }}>
+                <input type="text" value={to} onInput={(e) => setTo(e.target.value)} placeholder={`What they said instead of ${x.name}`} aria-label={`What they said instead of ${x.name}`} autocomplete="off" autocapitalize="words" enterkeyhint="done" />
+                <button class="btn wide" disabled={!to.trim()} onClick={() => fix(x.name)}>
+                  Fix it everywhere
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+      <div class="spacer" />
+      <button class="btn primary wide" onClick={onDone}>
+        The names look right
+      </button>
+    </main>
+  );
+}
+
 function BookView({ s, onRemake }) {
   const b = s.book;
   const save = async () => {
@@ -229,6 +291,7 @@ function BookView({ s, onRemake }) {
                 <li key={p.name}>
                   <strong>{p.name}</strong>
                   {p.note ? `, ${noteCase(p.note)}` : ""}
+                  {!p.note && p.said ? <span class="said">“{p.said}”</span> : null}
                 </li>
               ))}
             </ul>
@@ -244,6 +307,7 @@ function BookView({ s, onRemake }) {
                 <li key={p.name}>
                   <strong>{p.name}</strong>
                   {p.note ? `, ${noteCase(p.note)}` : ""}
+                  {!p.note && p.said ? <span class="said">“{p.said}”</span> : null}
                 </li>
               ))}
             </ul>

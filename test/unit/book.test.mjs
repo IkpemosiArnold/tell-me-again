@@ -79,13 +79,49 @@ test("notes and moments must be said together, not just somewhere (real Gemma 3 
     },
     text,
   );
-  assert.deepEqual(g.people, [{ name: "Daniel", note: "Grandfather" }]);
-  assert.deepEqual(g.places.map((p) => p.note), ["", "A port area in Lagos", ""]);
+  // "Grandfather" is never said in this text, so the role goes too
+  assert.deepEqual(g.people.map((p) => [p.name, p.note]), [["Daniel", ""]]);
+  assert.deepEqual(g.places.map((p) => p.note), ["", "", ""]); // "area" is never said either
   assert.deepEqual(g.moments.map((m) => m.when), ["1960", "1978"]);
   const why = g.dropped.map((d) => d.why).join(" | ");
   assert.match(why, /Lagos is not said with Ogg market/);
   assert.match(why, /1969 and Mary are not said together/);
   assert.match(why, /1980 and Lagos are not said together/);
+});
+
+test("no world knowledge in an elder's book: notes are kept only when the recording says them", () => {
+  const text =
+    "My name is Mama Efe, and I was born in Worry in 1951. My father, Paparacoro, fished on the river every morning. My mother sold pepper soup at Ogg market. " +
+    "My best friend was a girl called Terry. That was where I met your grandfather, Daniel. We moved to Lagos in 1978 because Daniel got work at the port in Apapa.";
+  const g = groundPassage(
+    {
+      title: "t",
+      retelling: "r",
+      quote: "",
+      people: [
+        { name: "Paparacoro", who: "Father" },
+        { name: "Terry", who: "Best friend" },
+        { name: "Daniel", who: "Grandfather" },
+      ],
+      places: [
+        { name: "Worry", note: "A small village in Nigeria" },
+        { name: "Ogg market", note: "Where her mother sold pepper soup" },
+        { name: "Lagos", note: "A major port city" },
+        { name: "Apapa", note: "A port area in Lagos" },
+      ],
+      moments: [
+        { when: "1951", what: "Mama Efe was born in Worry" },
+        { when: "1978", what: "Moved to Lagos for Daniel's work at the port" },
+        { when: "1978", what: "Bought a big house" },
+      ],
+    },
+    text,
+    { elder: { name: "Mama Efe" } },
+  );
+  assert.deepEqual(g.people.map((p) => p.note), ["Father", "Best friend", "Grandfather"]);
+  assert.deepEqual(g.places.map((p) => p.note), ["", "Where her mother sold pepper soup", "", ""]);
+  assert.deepEqual(g.moments.map((m) => m.what), ["Mama Efe was born in Worry", "Moved to Lagos for Daniel's work at the port"]);
+  assert.equal(g.places[0].said, "My name is Mama Efe, and I was born in Worry in 1951.");
 });
 
 test("an invented quote is dropped, a missing title falls back to the first words", () => {

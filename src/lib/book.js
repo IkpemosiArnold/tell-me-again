@@ -177,12 +177,17 @@ export function groundPassage(raw, passage, { elder } = {}) {
       seen.add(key);
       let note = str(item?.who ?? item?.note, 160);
       // "Ogg market, a bustling market in Lagos": the note's names must be said with this one
+      // and no world knowledge: "Lagos, a major port city" is true and still not hers to say.
+      // A note is kept only when its words are said in a sentence that names this one.
       const noteNames = capNames(note, passage).filter((n) => !appearsIn(n, name));
-      if (noteNames.length && !saidTogether([name, ...noteNames], passage)) {
+      if (note && noteNames.length && !saidTogether([name, ...noteNames], passage)) {
         dropped.push({ kind: "note", value: `${name}: ${note}`, why: `${noteNames.join(", ")} is not said with ${name} in the recording` });
         note = "";
+      } else if (note && support(note, passage, [name], elder) < 0.75) {
+        dropped.push({ kind: "note", value: `${name}: ${note}`, why: "the recording does not say this" });
+        note = "";
       }
-      out.push({ name, note });
+      out.push({ name, note, said: firstMention(name, passage) });
       if (out.length >= max) break;
     }
     return out;
@@ -225,6 +230,12 @@ export function groundPassage(raw, passage, { elder } = {}) {
     const terms = [...new Set([...ys, ...capNames(when, passage), ...capNames(what, passage)])];
     if (terms.length >= 2 && !saidTogether(terms, passage)) {
       dropped.push({ kind: "moment", value: `${when}: ${what}`, why: `${terms.join(" and ")} are not said together in the recording` });
+      continue;
+    }
+    // the words of the moment must be (mostly) said where its year or names are said
+    const anchors = terms.length ? terms : [];
+    if (anchors.length && support(what, passage, anchors, elder) < 0.6) {
+      dropped.push({ kind: "moment", value: `${when}: ${what}`, why: "the recording does not say this" });
       continue;
     }
     moments.push({ when, what });
@@ -275,6 +286,46 @@ export function capNames(text, passage = "") {
     ),
   );
   return [...new Set(words.filter((w, i) => /^\p{Lu}/u.test(w) && w.length > 2 && !COMMON.has(fold(w)) && (i > 0 || midCaps.has(fold(w)))))];
+}
+
+const STOP = new Set("the and but then from with for was are were been being not yes you your our their her his she they them its this that who how why what when where which did does about after again also very much many some more most other into onto over under then than there their them they this that these those with without were was have has had would could should will just like only even ever never always every where when what which while who whom whose".split(" "));
+
+/** Words of model-written text that carry meaning, cut to a 5-letter stem ("fished" ~ "fishing"). */
+function contentStems(text) {
+  return [
+    ...new Set(
+      fold(text)
+        .split(" ")
+        .filter((w) => w.length > 2 && !STOP.has(w))
+        .map((w) => w.slice(0, 5)),
+    ),
+  ];
+}
+
+/**
+ * How much of `claim` one sentence of the text supports: the best share of its content words
+ * found in a sentence that also contains every anchor (a name, a year). 1 when the claim has
+ * no content words; 0 when no sentence holds the anchors. The storyteller's own name counts
+ * as said.
+ */
+export function support(claim, text, anchors = [], elder = null) {
+  const stems = contentStems(claim);
+  const elderStems = new Set(contentStems(elder?.name || ""));
+  const need = stems.filter((x) => !elderStems.has(x));
+  let best = 0;
+  for (const sent of sentences(text)) {
+    if (!anchors.every((a) => appearsIn(a, sent))) continue;
+    if (!need.length) return 1;
+    const have = new Set(fold(sent).split(" ").map((w) => w.slice(0, 5)));
+    best = Math.max(best, need.filter((x) => have.has(x)).length / need.length);
+  }
+  return best;
+}
+
+/** The first sentence of the text that names `name`, for showing where a name came from. */
+export function firstMention(name, text) {
+  const sent = sentences(text).find((x) => appearsIn(name, x)) || "";
+  return sent.length > 160 ? `${sent.slice(0, 157).replace(/\s+\S*$/, "")}…` : sent;
 }
 
 /** True when one sentence of the text contains every term. */

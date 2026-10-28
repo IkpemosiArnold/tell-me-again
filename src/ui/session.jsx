@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Bar, ErrorNote, Progress, Why, bytesDetail, go, saveFile, toast, useWakeLock } from "./common.jsx";
 import { deleteSession, getBlob, getSession, newId, putBlob, saveSession } from "../store/db.js";
 import { LANGUAGES, planFor } from "../lib/languages.js";
-import { clock, replaceWord } from "../lib/text.js";
+import { clock } from "../lib/text.js";
+import { fixNameEverywhere } from "../lib/names.js";
 import { fmtDate, nairaFor, runtimes } from "../state.js";
 import { onWriter, stopWriting, toWrite, writeDown, writerState } from "./writer.js";
 import { buildArchive, archiveName } from "../lib/archive.js";
@@ -296,22 +297,7 @@ function FixName({ s, onDone }) {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const fix = async () => {
-    let n = 0;
-    for (const st of s.stories) {
-      if (st.transcript?.lines) {
-        st.transcript.lines = st.transcript.lines.map((l) => {
-          const r = replaceWord(l.text, from, to.trim());
-          n += r.n;
-          return r.n ? { ...l, text: r.text } : l;
-        });
-        if (n) st.transcript.edited = true;
-      }
-      if (st.typed) {
-        const r = replaceWord(st.typed, from, to.trim());
-        n += r.n;
-        st.typed = r.text;
-      }
-    }
+    const n = fixNameEverywhere(s, from, to);
     await saveSession(s);
     toast(n ? `Fixed ${n} ${n === 1 ? "time" : "times"}` : `"${from.trim()}" was not found`);
     if (n) {

@@ -153,6 +153,19 @@ try {
 
   log("story book");
   await page.getByRole("button", { name: "Make the story book" }).click();
+  // "Did they say these names?": fix the birthplace as Whisper heard it, everywhere
+  await page.getByRole("heading", { name: "Did they say these names?" }).waitFor();
+  const heard = (/born in ([\p{L}'-]+)/iu.exec(transcript) || [])[1] || "";
+  const row = page.locator(".item").filter({ has: page.locator(".name", { hasText: new RegExp(`^${heard}$`, "i") }) });
+  let fixedBirthplace = false;
+  if (heard && heard !== "warri" && (await row.count())) {
+    await row.getByRole("button", { name: "Fix" }).click();
+    await row.getByRole("textbox").fill("Warri");
+    await shot("09a-names");
+    await row.getByRole("button", { name: "Fix it everywhere" }).click();
+    fixedBirthplace = true;
+  }
+  await page.getByRole("button", { name: "The names look right" }).click();
   await shot("09-book-choice");
   await page.getByRole("radio", { name: /With Google/ }).click();
   await page.getByText(/may keep this text/).waitFor();
@@ -164,8 +177,8 @@ try {
   await page.waitForTimeout(800);
   await shot("11-book");
   const book = await page.locator("article.page").innerText();
-  const bornIn = (/born in ([\p{L}'-]+)/iu.exec(transcript) || [])[1];
-  assert.ok(bornIn && book.toLowerCase().includes(bornIn), `the birthplace as heard ("${bornIn}") is in the book`);
+  const bornIn = fixedBirthplace ? "warri" : (/born in ([\p{L}'-]+)/iu.exec(transcript) || [])[1];
+  assert.ok(bornIn && book.toLowerCase().includes(bornIn), `the birthplace ("${bornIn}") is in the book`);
   const kept = book.split("Left out")[0];
   assert.doesNotMatch(kept, /Uncle Invented|1999/);
   // the synthetic voice says "Tari"; when Whisper writes it another way, a question about Tari is not grounded

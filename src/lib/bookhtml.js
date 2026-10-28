@@ -57,6 +57,7 @@ export function renderBookHtml(book, session) {
   ul { padding-left: 1.2rem; }
   li { margin: .3rem 0; }
   .none { color: var(--soft); }
+  .said { color: var(--soft); font-size: .92rem; font-style: italic; }
   .note { color: var(--soft); font-size: .9rem; border-top: 1px solid var(--line); margin-top: 3rem; padding-top: 1rem; }
   @media print { body { background: #fff; color: #000; } main { padding: 0; } h2 { break-after: avoid; } }
 </style>
@@ -73,9 +74,9 @@ ${c.quote ? `<blockquote>${e(c.quote)}</blockquote>` : ""}`,
   )
   .join("\n")}
 <h2>People</h2>
-${list(book.people, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(noteCase(p.note))}` : ""}</li>`)}
+${list(book.people, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(noteCase(p.note))}` : ""}${!p.note && p.said ? `<br><span class="said">“${e(p.said)}”</span>` : ""}</li>`)}
 <h2>Places</h2>
-${list(book.places, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(noteCase(p.note))}` : ""}</li>`)}
+${list(book.places, (p) => `<li><strong>${e(p.name)}</strong>${p.note ? `, ${e(noteCase(p.note))}` : ""}${!p.note && p.said ? `<br><span class="said">“${e(p.said)}”</span>` : ""}</li>`)}
 <h2>Timeline</h2>
 ${list(book.timeline, (m) => `<li><strong>${e(m.when || "Undated")}</strong>: ${e(m.what)}</li>`)}
 ${book.questions?.length ? `<h2>Questions to ask next time</h2>\n${list(book.questions, (q) => `<li>${e(q)}</li>`)}` : ""}

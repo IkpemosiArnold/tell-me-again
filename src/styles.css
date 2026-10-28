@@ -794,6 +794,13 @@ audio {
   flex-direction: column;
   gap: 6px;
 }
+.book .said {
+  display: block;
+  color: var(--soft);
+  font-size: 0.92rem;
+  font-style: italic;
+  margin-top: 2px;
+}
 .book .made {
   color: var(--soft);
   font-size: 0.92rem;
@@ -816,7 +823,7 @@ audio {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
   translate: -50% 0;
   background: var(--ink);
   color: var(--bg);
@@ -837,7 +844,7 @@ audio {
 @keyframes toast-in {
   from {
     opacity: 0;
-    translate: -50% 10px;
+    translate: -50% -10px;
   }
 }
 
