@@ -77,7 +77,17 @@ It's a static site: Preact and Vite, no backend. Everything heavy happens in the
 
 [PENDING: measured on my 2017 MacBook Pro: N-minute recording, Whisper base X min, Gemma 3 1B Y min for Z passages, at load average W.]
 
-**The ghost in the machine.** Small models make things up. [PENDING: what real Gemma 3 1B / 270M invented on the test story, quoted exactly. Only write this if it actually happened.] In a family archive that is not a quirk, it's a lie about your grandmother that will outlive her. So nothing Gemma writes about people, places, years or quotes is kept unless it appears in the transcript. A quote must be word for word. A year must have been said. A question for next time can't ask about someone the recording never mentions. Whatever is dropped is listed under "Left out", so the family sees what the model invented and can decide for themselves.
+**The ghost in the machine.** Small models make things up, and in a family archive that is not a quirk. It's a lie about your grandmother that will outlive her. So my first version kept nothing Gemma wrote about a person, place, year or quote unless it appeared in the transcript. A quote had to be word for word, a year had to have been said, and a question for next time couldn't ask about someone the recording never mentions.
+
+Then I ran the real Gemma 3 1B on my made-up Mama Efe, and every check passed. The book was still wrong:
+
+- It put Ogbe market in Lagos. In the story it's in Warri.
+- It said she went to St. Mary's in 1969. She started in 1961 and *finished* school in 1969.
+- It moved the family to Lagos in 1980. They moved in 1978; 1980 is when her son was born.
+
+Every name and year was in the transcript, just never together. The ghost wasn't inventing facts, it was rearranging real ones, which is worse because it sounds right. So now a note about a place must name only things said in the same sentence as that place, and a moment's year and names must be said in the same sentence too. All three of those mistakes now land under "Left out", which lists everything the checks removed, so the family can see what the model tried to say and decide for themselves.
+
+Whisper has its own ghosts. It heard Warri as "worry", Surulere as "Sierra Leer" and Benin City as "Ben and City". So when a name comes out wrong, you fix it once ("worry" to "Warri") and it's fixed in every story of the session.
 
 **The opt-in.** On a phone, a 242 MB model writes a rougher book. So there's a second option: Gemma 4 on Google's free Gemini API, with your own free key from AI Studio (no card needed). The page tells you plainly that Google's free tier may keep the text and have people read it, quoting their terms. It sends text only, never audio, and swaps the names for stand-ins (N1, N2) before sending and back after. The key lives in the tab's memory and is gone when you close it. You have to tick "Send this session's text to Google, this time only" every session.
 

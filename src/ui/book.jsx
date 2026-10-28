@@ -101,6 +101,8 @@ function Maker({ s, onDone }) {
       });
       book.made.seconds = Math.round((performance.now() - t0) / 1000);
       if (backend.where === "google") book.made.namesHidden = hide;
+      if (backend.threads) book.made.threads = backend.threads;
+      book.made.isolated = !!globalThis.crossOriginIsolated;
       await onDone(book);
       toast("The story book is ready");
     } catch (e) {

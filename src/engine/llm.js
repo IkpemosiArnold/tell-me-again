@@ -61,6 +61,8 @@ export function wllamaBackend(key = "gemma3-1b") {
       w = new Wllama({ default: WLLAMA_WASM }, { allowOffline: true, suppressNativeLog: true });
       w.setCompat?.("default");
       await w.loadModel([blob], { n_ctx: m.ctx, n_batch: 512, n_gpu_layers: 0 });
+      // how many threads llama.cpp got (1 without cross-origin isolation), shown with the book
+      this.threads = w.isMultithread?.() ? w.getNumThreads?.() : 1;
     },
     async run(messages, schema, maxTokens = 600) {
       const res = await w.createChatCompletion({
