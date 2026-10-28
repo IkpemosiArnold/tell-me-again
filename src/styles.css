@@ -245,7 +245,8 @@ button,
 .link {
   background: none;
   border: 0;
-  padding: 8px 0;
+  padding: 10px 0;
+  min-height: 44px;
   color: var(--lamp-text);
   font-weight: 500;
   text-decoration: underline;
@@ -489,7 +490,8 @@ details.why summary {
   list-style: none;
   color: var(--lamp-text);
   font-weight: 500;
-  padding: 6px 0;
+  padding: 10px 0;
+  min-height: 44px;
   width: fit-content;
   text-decoration: underline;
   text-underline-offset: 3px;

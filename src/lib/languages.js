@@ -22,7 +22,7 @@ export const LANGUAGES = [
   {
     id: "pcm",
     name: "Pidgin",
-    native: "Naijá",
+    native: "Pidgin",
     asr: "whisper-en",
     level: "rough",
     note: "A rough draft. The model hears Pidgin as English and often turns it into English words.",
