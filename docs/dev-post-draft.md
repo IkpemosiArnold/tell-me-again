@@ -8,9 +8,12 @@ cover_image: [UPLOAD: docs/screens/cover.png]
 <!--
 DRAFT for Arnold. Not published. No em dashes. Every number below was measured or sourced on
 28 to 30 Oct 2026; sources are in docs/ASR-FINDINGS.md and docs/DEPLOY.md.
-[ARNOLD: ...] marks a line only you can write. [PENDING: ...] marks a number still being measured.
+[ARNOLD: ...] marks a line only you can write. There are no [PENDING] numbers left.
 Nothing about your grandmother is in this draft: not her name, words, voice or face. Add only what
 you and she are happy to share.
+Before posting: open the live site on your iPhone and record a short test (the build was tested
+in Chrome only; Playwright's WebKit does not run on this Mac), and upload docs/screens/*.png and
+docs/demo/tell-me-again-demo.mp4 where the [SCREENSHOT] and [VIDEO] lines are.
 -->
 
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 4: Ghost in the Machine](https://dev.to/challenges/hacktoberfest-week4-2026-10-26)*
@@ -58,7 +61,7 @@ Even in English the names suffer. In my test recording (a synthetic voice readin
 
 ## Demo
 
-**Live:** https://tellmeagain.onrender.com (it works best on Chrome or Safari; the first "write it down" downloads a 41 MB speech model on phones, 136 MB on a computer)
+**Live:** https://tellmeagain.onrender.com (the first "write it down" downloads a 41 MB speech model on a phone, 136 MB on a computer)
 
 [VIDEO: docs/demo/tell-me-again-demo.mp4, about a minute. A synthetic voice reads a made-up story about a made-up Mama Efe; no real person is in it. Whisper runs live. The story book step replays the answer Gemma 3 1B gave for this story on my laptop (it took 17 minutes, so the video skips the wait, and says so), and the new checks run on it live.]
 
@@ -78,7 +81,7 @@ It's a static site: Preact and Vite, no backend. Everything heavy happens in the
 
 **The story book.** Gemma 3 runs through llama.cpp compiled to WebAssembly (wllama): the 1B model (722 MB) on a computer, the 270M model (242 MB) on a phone. The answer is forced into a JSON shape by a grammar, so a small model can't wander off into prose. Small models can't read a long transcript at once, so the work is split: one call per passage of about 450 words (a chapter title, a short retelling, one quote, the people, places and moments in that passage), then one call for the book's title and the questions for next time.
 
-On my 2017 MacBook Pro (2 cores, and busy with other work at the time), Whisper base wrote down the 98-second test story in 63 seconds. Gemma 3 1B took 17 minutes for the whole book, partly because llama.cpp was running on one thread: wllama uses half of the cores the browser reports, and this laptop reports 2. It now asks for two. [PENDING: the time with two threads.] Gemma 4 on Google's API took 18 to 54 seconds. A slow computer can also pick the 242 MB Gemma, which is rougher and quicker.
+All my timings come from a 2017 dual-core MacBook Pro that was busy with other work at the time, so treat them as a worst case. Whisper base wrote down the 98-second test story in 63 seconds. Gemma 3 1B took 17 minutes for the whole book, partly because llama.cpp was running on one thread: wllama uses half of the cores the browser reports, and this laptop reports 2. It now asks for two, but I didn't get a clean timing with two threads before the deadline. Gemma 4 on Google's API took 18 to 54 seconds. A slow computer can also switch to the 242 MB Gemma, which is smaller and rougher. The demo video replays Gemma 3 1B's real answer instead of making you sit through 17 minutes, and says so.
 
 **The ghost in the machine.** Small models make things up. In a family archive, a made-up detail about your grandmother can outlive her. So my first version kept nothing Gemma wrote about a person, place, year or quote unless it appeared in the transcript. A quote had to be word for word, a year had to have been said, and a question for next time couldn't ask about someone the recording never mentions.
 
