@@ -63,7 +63,7 @@ Even in English the names suffer. In my test recording (a synthetic voice readin
 
 **Live:** https://tellmeagain.onrender.com (the first "write it down" downloads a 41 MB speech model on a phone, 136 MB on a computer)
 
-[VIDEO: docs/demo/tell-me-again-demo.mp4, about a minute. A synthetic voice reads a made-up story about a made-up Mama Efe; no real person is in it. Whisper runs live. The story book step replays the answer Gemma 3 1B gave for this story on my laptop (it took 17 minutes, so the video skips the wait, and says so), and the new checks run on it live.]
+[VIDEO: docs/demo/tell-me-again-demo.mp4, 86 seconds, with sound under the recording part. A synthetic voice reads a made-up story about a made-up Mama Efe; no real person is in it. Whisper runs live. The story book step replays the answer Gemma 3 1B gave for this story on my laptop (it took 17 minutes, so the video skips the wait, and says so), and the new checks run on it live.]
 
 [SCREENSHOT: docs/screens/after-book.png. Caption: "The story book. Places show the sentence they were heard in, not what the model knows about them."]
 
