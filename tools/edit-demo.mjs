@@ -10,7 +10,7 @@ import path from "node:path";
 const [dir, wav, cards, out] = process.argv.slice(2);
 const raw = JSON.parse(readFileSync(path.join(dir, "timings.json"), "utf8"));
 // marks count from the screencast start; the video starts at its first frame
-const t = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Math.max(0, v - (raw.videoStart || 0))]));
+const t = Object.fromEntries(Object.entries(raw).filter(([, v]) => typeof v === "number").map(([k, v]) => [k, Math.max(0, v - (raw.videoStart || 0))]));
 const src = path.join(dir, "demo.mp4");
 const tmp = path.join(dir, "parts");
 mkdirSync(tmp, { recursive: true });
@@ -41,8 +41,9 @@ card(path.join(cards, "card-record.png"), 2.5);
 // 3. writing it down, sped up to about 6 s, then the transcript
 clip(t.finish, t.written, Math.max(1, (t.written - t.finish) / 6));
 clip(t.written, t.names);
-// 4. "Did they say these names?"
-clip(t.names, t.names + 12);
+// 4. "Did they say these names?": the first two fixes in real time, the rest sped up
+clip(t.names, t.namesTwo || t.names + 12);
+if (t.namesTwo && t.namesDone > t.namesTwo + 0.5) clip(t.namesTwo, t.namesDone, Math.max(1, (t.namesDone - t.namesTwo) / 2));
 // 5. the Gemma step is a replay: say so
 card(path.join(cards, "card-gemma.png"), 3.5);
 // 6. the book, and what the checks left out

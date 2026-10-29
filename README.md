@@ -85,7 +85,7 @@ The sample voice is macOS's synthetic "Daniel" reading a made-up story (`test/fi
 
 ### Tools
 
-- `tools/demo-video.mjs` records the demo at phone size with the synthetic story as the microphone, and `tools/edit-demo.mjs` cuts it to about a minute. The story book step in the demo replays Gemma 3 1B's real answer for that story (`docs/screens/gemma-3-1b-answer.json`), because the real call took 17 minutes; the video says so.
+- `tools/demo-video.mjs` records the demo at phone size with the synthetic story as the microphone, and `tools/edit-demo.mjs` cuts it to about a minute. The demo fixes every name Whisper misheard, and its story book step replays Gemma 3 1B's real answer for that story (`docs/screens/gemma-3-1b-answer.json`) with the same name fixes applied, because the real call took 17 minutes; the video says so.
 - `tools/real-run.mjs` puts one recording through the app with the real models. With `PRIVATE=1` it takes no screenshots and deletes the session afterwards, for testing with a family's own recordings on your own machine.
 - `tools/phone-check.mjs` checks phone sizes: no sideways scroll, 17 px text, tap targets, words above the fold.
 - `tools/cards.mjs` draws the video's title cards and the cover image.

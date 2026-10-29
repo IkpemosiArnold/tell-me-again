@@ -1,12 +1,40 @@
 {
-  "home": 5.34,
-  "consent": 20.55,
-  "consentRecord": 20.77,
-  "storyRecord": 28.78,
-  "finish": 130.41,
-  "written": 548.62,
-  "names": 555.31,
-  "book": 567.34,
-  "end": 579.12,
+  "home": 0.64,
+  "consent": 12.34,
+  "consentRecord": 12.53,
+  "storyRecord": 19.11,
+  "finish": 119.95,
+  "written": 310.73,
+  "names": 317.05,
+  "namesTwo": 327.05,
+  "namesDone": 330.04,
+  "fixes": [
+    [
+      "Worry",
+      "Warri"
+    ],
+    [
+      "Paparacoro",
+      "Papa Okoro"
+    ],
+    [
+      "Ogg",
+      "Ogbe"
+    ],
+    [
+      "Terry",
+      "Tari"
+    ],
+    [
+      "Marmouith",
+      "Mama Efe"
+    ],
+    [
+      "Sierra Leer",
+      "Surulere"
+    ]
+  ],
+  "book": 335.39,
+  "end": 347.14,
   "videoStart": 0
 }

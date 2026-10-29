@@ -5,7 +5,8 @@
 //
 // Whisper runs for real. The story book step replays the answer Gemma 3 1B really gave for
 // this story on a 2017 laptop (docs/screens/gemma-3-1b-answer.json), because the real call
-// took 17 minutes; the app's checks then run on that answer live. Needs `npm run build`
+// took 17 minutes, with the family's name fixes applied to it (a real run would read the
+// fixed transcript); the app's checks then run on that answer live. Needs `npm run build`
 // first and Google Chrome (CHROME to point at another Chromium).
 // Output: demo.mp4 (no sound), timings.json (marks in seconds from the video's start),
 // after-book.png (whole page) and after-book-left-out.png.
@@ -53,7 +54,13 @@ try {
         async unload() {},
         async run(messages, schema) {
           await new Promise((res) => setTimeout(res, 1500));
-          return JSON.stringify(schema.required.includes("retelling") ? r.passage : r.book);
+          // the family's name fixes, applied to the replayed answer as whole words
+          let text = JSON.stringify(schema.required.includes("retelling") ? r.passage : r.book);
+          for (const [heard, said] of globalThis.__demoFixes || []) {
+            const esc = heard.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            text = text.replace(new RegExp(`(?<![\\p{L}])${esc}(?![\\p{L}])`, "giu"), said);
+          }
+          return text;
         },
       },
     };
@@ -120,16 +127,39 @@ try {
   mark("names");
   await slow(2500);
   await still("09-names");
-  // the storyteller's own name, misheard; fixing it does not change Gemma's replayed answer
-  const row = page.locator(".item").filter({ has: page.locator(".name", { hasText: /^Marm/ }) });
-  if (await row.count()) {
+  // Fix every name Whisper misheard in the synthetic story (docs/demo/demo-story.txt says
+  // what was really said). The first two fixes play at normal speed on camera; the editor
+  // speeds up the rest. The same fixes are applied to the replayed Gemma answer, which is
+  // what a real run does: the names are fixed before Gemma reads the transcript.
+  const FIXES = [
+    [/^Worry$/, "Warri"],
+    [/^Paparacoro$/, "Papa Okoro"],
+    [/^Ogg Market$/, "Ogbe Market"],
+    [/^Ogg$/, "Ogbe"],
+    [/^Terry$/, "Tari"],
+    [/^Marm/, "Mama Efe"],
+    [/^Sierra Leer$/, "Surulere"],
+  ];
+  const applied = [];
+  for (const [re, said] of FIXES) {
+    const row = page.locator(".item").filter({ has: page.locator(".name", { hasText: re }) }).first();
+    if (!(await row.count())) continue;
+    const heard = (await row.locator(".name").innerText()).trim();
+    const onCamera = applied.length < 2;
     await row.getByRole("button", { name: "Fix" }).click();
-    await slow(600);
-    await row.getByRole("textbox").pressSequentially("Mama Efe", { delay: 90 });
-    await slow(500);
+    await slow(onCamera ? 600 : 150);
+    if (onCamera) await row.getByRole("textbox").pressSequentially(said, { delay: 90 });
+    else await row.getByRole("textbox").fill(said);
+    await slow(onCamera ? 500 : 100);
     await row.getByRole("button", { name: "Fix it everywhere" }).click();
-    await slow(1800);
+    applied.push([heard, said]);
+    await slow(onCamera ? 1800 : 400);
+    if (applied.length === 2) mark("namesTwo");
   }
+  mark("namesDone");
+  marks.fixes = applied;
+  console.log("name fixes:", JSON.stringify(applied));
+  await page.evaluate((pairs) => (globalThis.__demoFixes = pairs), applied);
   await page.getByRole("button", { name: "The names look right" }).click();
   await slow(2000);
   await page.getByRole("button", { name: /make the book/i }).click();

@@ -22,7 +22,7 @@ const lamp = `<svg viewBox="0 0 120 160" fill="none" stroke="#f4f1ea" stroke-wid
 const phoneCard = (h, p) => `<style>${style} body{width:390px;height:844px;display:flex;align-items:center} div{padding:0 34px} h1{font-size:31px;line-height:1.2;margin-bottom:16px} p{font-size:19px;line-height:1.5}</style><div><h1>${h}</h1><p>${p}</p></div>`;
 const cards = {
   "card-record.png": [390, 844, phoneCard("A made-up Mama Efe, a synthetic voice.", "No real person is in this video. The lamp follows the voice.")],
-  "card-gemma.png": [390, 844, phoneCard("Skipping the wait.", "On a 2017 laptop, Gemma 3 1B took <b>17 minutes</b> to read this story. What follows replays its real answer, and the checks run on it live.")],
+  "card-gemma.png": [390, 844, phoneCard("Skipping the wait.", "On a 2017 laptop, Gemma 3 1B took <b>17 minutes</b> to read this story. What follows replays its real answer, with the same name fixes applied, and the checks run on it live.")],
   "card-end.png": [390, 844, phoneCard("Tell Me Again", "tellmeagain.onrender.com<br>Open source, MIT. Nothing leaves the phone unless you say so.")],
   "cover.png": [
     1000,
