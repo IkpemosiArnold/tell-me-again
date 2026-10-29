@@ -73,7 +73,9 @@ try {
   await page.getByRole("button", { name: "Back" }).click();
   await page.getByRole("button", { name: "Make the story book" }).click();
   const names = page.getByRole("button", { name: "The names look right" });
-  if (await names.isVisible().catch(() => false)) {
+  // the names check comes first when the transcript has capitalised names; wait for whichever screen shows
+  await names.or(page.getByRole("radio", { name: /On this device/ })).first().waitFor({ timeout: 60000 });
+  if (await names.isVisible()) {
     writeFileSync(path.join(outdir, "names.txt"), await page.locator(".list").innerText());
     await names.click();
   }
